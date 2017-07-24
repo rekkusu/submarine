@@ -1,4 +1,4 @@
-package models
+package adctf
 
 import "github.com/jinzhu/gorm"
 
