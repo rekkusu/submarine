@@ -4,15 +4,16 @@ import (
 	"encoding/json"
 	"testing"
 
+	"github.com/activedefense/submarine/models"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/mattn/go-sqlite3"
 )
 
-func TestChallengeRepositoryAll(t *testing.T) {
+func TestChallengeStoreAll(t *testing.T) {
 	db, expect, _, _ := initDB()
 	defer db.Close()
-	repo := DefaultChallengeRepository{db}
+	repo := ChallengeStore{db}
 
 	chals, err := repo.All()
 	if err != nil {
@@ -27,14 +28,14 @@ func TestChallengeRepositoryAll(t *testing.T) {
 	}
 }
 
-func TestChallengeRepositoryGet(t *testing.T) {
+func TestChallengeStoreGet(t *testing.T) {
 	db, expect, _, _ := initDB()
 	defer db.Close()
-	repo := DefaultChallengeRepository{db}
+	repo := ChallengeStore{db}
 
 	tests := []struct {
 		id     int
-		expect Challenge
+		expect models.Challenge
 	}{
 		{1, expect[0]},
 		{5, expect[4]},
@@ -47,26 +48,26 @@ func TestChallengeRepositoryGet(t *testing.T) {
 	}
 }
 
-func TestChallengeRepositorySave(t *testing.T) {
+func TestChallengeStoreSave(t *testing.T) {
 	db, _, _, _ := initDB()
 	defer db.Close()
-	repo := DefaultChallengeRepository{db}
+	repo := ChallengeStore{db}
 
 	tests := []struct {
-		chal   Challenge
+		chal   models.Challenge
 		expect error
 	}{
 		{
-			&challenge{Title: "title", Point: 100, Description: "desc", Flag: "flag"},
+			&Challenge{Title: "title", Point: 100, Description: "desc", Flag: "flag"},
 			nil,
 		},
 		{
-			&challenge{ID: 1, Title: "title", Point: 100, Description: "desc", Flag: "flag"},
+			&Challenge{ID: 1, Title: "title", Point: 100, Description: "desc", Flag: "flag"},
 			sqlite3.ErrConstraintPrimaryKey,
 		},
 		{
 			&fakeChal{},
-			ErrModelMismatched,
+			models.ErrModelMismatched,
 		},
 	}
 
@@ -77,7 +78,7 @@ func TestChallengeRepositorySave(t *testing.T) {
 			assert.Error(t, actual)
 			assert.Equal(t, test.expect, actual.ExtendedCode, "db error")
 		} else {
-			if chal, ok := test.chal.(*challenge); ok {
+			if chal, ok := test.chal.(*Challenge); ok {
 				assert.NotEmpty(t, chal.ID, "")
 			}
 			assert.Equal(t, test.expect, err, "")
@@ -86,5 +87,5 @@ func TestChallengeRepositorySave(t *testing.T) {
 }
 
 type fakeChal struct {
-	challenge
+	Challenge
 }

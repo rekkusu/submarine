@@ -4,14 +4,15 @@ import (
 	"encoding/json"
 	"testing"
 
+	"github.com/activedefense/submarine/models"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/mattn/go-sqlite3"
 )
 
-func TestSubmissionRepositoryAll(t *testing.T) {
+func TestSubmissionStoreAll(t *testing.T) {
 	db, _, expect, _ := initDB()
-	repo := DefaultSubmissionRepository{db}
+	repo := SubmissionStore{db}
 
 	submissions, err := repo.All()
 	if err != nil {
@@ -26,13 +27,13 @@ func TestSubmissionRepositoryAll(t *testing.T) {
 	}
 }
 
-func TestSubmissionRepositoryGet(t *testing.T) {
+func TestSubmissionStoreGet(t *testing.T) {
 	db, _, expect, _ := initDB()
-	repo := DefaultSubmissionRepository{db}
+	repo := SubmissionStore{db}
 
 	tests := []struct {
 		id     int
-		expect Submission
+		expect models.Submission
 	}{
 		{1, expect[0]},
 		{100, nil},
@@ -46,25 +47,25 @@ func TestSubmissionRepositoryGet(t *testing.T) {
 	}
 }
 
-func TestSubmissionRepositorySave(t *testing.T) {
+func TestSubmissionStoreSave(t *testing.T) {
 	db, chals, _, _ := initDB()
-	repo := DefaultSubmissionRepository{db}
+	repo := SubmissionStore{db}
 
 	tests := []struct {
-		sub    Submission
+		sub    models.Submission
 		expect error
 	}{
 		{
-			&submission{Challenge: chals[0], Answer: "test", Score: 100, Correct: false},
+			&Submission{Challenge: chals[0], Answer: "test", Score: 100, Correct: false},
 			nil,
 		},
 		{
-			&submission{ID: 1, Answer: "test", Score: 100, Correct: false},
+			&Submission{ID: 1, Answer: "test", Score: 100, Correct: false},
 			sqlite3.ErrConstraintPrimaryKey,
 		},
 		{
 			&fakeSubmission{},
-			ErrModelMismatched,
+			models.ErrModelMismatched,
 		},
 	}
 
@@ -81,5 +82,5 @@ func TestSubmissionRepositorySave(t *testing.T) {
 }
 
 type fakeSubmission struct {
-	submission
+	Submission
 }
