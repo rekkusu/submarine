@@ -12,10 +12,10 @@ func initDB() (*gorm.DB, []*Challenge, []*Submission, []*Team) {
 	}
 
 	teams := []*Team{
-		&Team{TeamName: "team1"},
-		&Team{TeamName: "team2"},
-		&Team{TeamName: "team3"},
-		&Team{TeamName: "team4"},
+		&Team{Username: "user1"},
+		&Team{Username: "user2"},
+		&Team{Username: "user3"},
+		&Team{Username: "user4"},
 	}
 
 	submissions := []*Submission{

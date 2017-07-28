@@ -7,7 +7,8 @@ import (
 
 type Team struct {
 	ID       int    `json:"id"`
-	TeamName string `json:"team_name"`
+	Username string `json:"username"`
+	Password string `json:"-"`
 }
 
 func (t Team) GetID() int {
@@ -15,30 +16,19 @@ func (t Team) GetID() int {
 }
 
 func (t Team) GetName() string {
-	return t.TeamName
+	return t.Username
 }
 
-type User struct {
-	ID       int
-	Team     *Team
-	Username string
-	Password string
-}
-
-func (u User) GetID() int {
-	return u.ID
-}
-
-func (u User) GetTeam() ctf.Team {
-	return u.Team
-}
-
-func (u User) GetUsername() string {
+func (u Team) GetUsername() string {
 	return u.Username
 }
 
-func (u User) GetPassword() string {
+func (u Team) GetPassword() string {
 	return u.Password
+}
+
+func (u Team) GetTeam() ctf.Team {
+	return u
 }
 
 type TeamStore struct {

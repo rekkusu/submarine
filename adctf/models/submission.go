@@ -12,8 +12,6 @@ type Submission struct {
 	ID          int        `json:"id" gorm:"primary_key;AUTO_INCREMENT"`
 	Team        *Team      `json:"team" gorm:"ForeignKey:TeamID"`
 	TeamID      int        `json:"-"`
-	User        *User      `json:"user" gorm:"ForeignKey:UserID"`
-	UserID      int        `json:"-"`
 	Challenge   *Challenge `json:"challenge" gorm:"ForeignKey:ChallengeID"`
 	ChallengeID int        `json:"-"`
 	Answer      string     `json:"answer"`
@@ -31,7 +29,7 @@ func (s Submission) GetTeam() ctf.Team {
 }
 
 func (s Submission) GetUser() ctf.User {
-	return s.User
+	return s.Team
 }
 
 func (s Submission) GetChallenge() ctf.Challenge {

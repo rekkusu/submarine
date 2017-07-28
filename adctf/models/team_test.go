@@ -55,11 +55,11 @@ func TestTeamStoreSaveTeam(t *testing.T) {
 		expect error
 	}{
 		{
-			&Team{TeamName: "test1"},
+			&Team{Username: "test1"},
 			nil,
 		},
 		{
-			&Team{ID: 1, TeamName: "test2"},
+			&Team{ID: 1, Username: "test2"},
 			sqlite3.ErrConstraintPrimaryKey,
 		},
 		{
