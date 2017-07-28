@@ -1,7 +1,7 @@
-package adctf
+package models
 
 import (
-	"github.com/activedefense/submarine/models"
+	"github.com/activedefense/submarine/ctf"
 	"github.com/jinzhu/gorm"
 )
 
@@ -29,7 +29,7 @@ func (u User) GetID() int {
 	return u.ID
 }
 
-func (u User) GetTeam() models.Team {
+func (u User) GetTeam() ctf.Team {
 	return u.Team
 }
 
@@ -45,13 +45,13 @@ type TeamStore struct {
 	DB *gorm.DB
 }
 
-func (store *TeamStore) AllTeams() ([]models.Team, error) {
+func (store *TeamStore) AllTeams() ([]ctf.Team, error) {
 	var teams []Team
 	if err := store.DB.Find(&teams).Error; err != nil {
 		return nil, err
 	}
 
-	result := make([]models.Team, len(teams))
+	result := make([]ctf.Team, len(teams))
 	for i, _ := range teams {
 		result[i] = &teams[i]
 	}
@@ -59,7 +59,7 @@ func (store *TeamStore) AllTeams() ([]models.Team, error) {
 	return result, nil
 }
 
-func (store *TeamStore) GetTeam(id int) (models.Team, error) {
+func (store *TeamStore) GetTeam(id int) (ctf.Team, error) {
 	var t Team
 	if err := store.DB.First(&t, id).Error; err != nil {
 		return nil, err
@@ -67,10 +67,10 @@ func (store *TeamStore) GetTeam(id int) (models.Team, error) {
 	return &t, nil
 }
 
-func (store *TeamStore) SaveTeam(t models.Team) error {
+func (store *TeamStore) SaveTeam(t ctf.Team) error {
 	team, ok := t.(*Team)
 	if !ok {
-		return models.ErrModelMismatched
+		return ctf.ErrModelMismatched
 	}
 
 	return store.DB.Create(team).Error

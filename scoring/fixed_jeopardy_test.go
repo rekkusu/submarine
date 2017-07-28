@@ -5,15 +5,15 @@ import (
 	"testing"
 	"time"
 
-	"github.com/activedefense/submarine/models"
+	"github.com/activedefense/submarine/ctf"
 	"github.com/activedefense/submarine/rules"
 )
 
-func genJeopardy(chals []models.Challenge, teams []models.Team, submissions []models.Submission) rules.JeopardyRule {
+func genJeopardy(chals []ctf.Challenge, teams []ctf.Team, submissions []ctf.Submission) rules.JeopardyRule {
 	rule := jeopardy{
-		Challenge:  &challengeStore{make(map[int]models.Challenge)},
-		Submission: &submissionStore{make(map[int]models.Submission)},
-		Team:       &teamStore{make(map[int]models.Team)},
+		Challenge:  &challengeStore{make(map[int]ctf.Challenge)},
+		Submission: &submissionStore{make(map[int]ctf.Submission)},
+		Team:       &teamStore{make(map[int]ctf.Team)},
 	}
 	for _, item := range chals {
 		rule.Challenge.Save(item)
@@ -30,13 +30,13 @@ func genJeopardy(chals []models.Challenge, teams []models.Team, submissions []mo
 }
 
 func Test_FixedJeopardy_GetRanking(t *testing.T) {
-	chals := []models.Challenge{
+	chals := []ctf.Challenge{
 		&jeopardyChallenge{1, "chal1", 100, "desc", "flag1"},
 		&jeopardyChallenge{2, "chal2", 200, "desc", "flag2"},
 		&jeopardyChallenge{3, "chal3", 400, "desc", "flag3"},
 	}
 
-	teams := []models.Team{
+	teams := []ctf.Team{
 		&team{1, "team1"},
 		&team{2, "team2"},
 		&team{3, "team3"},
@@ -47,11 +47,11 @@ func Test_FixedJeopardy_GetRanking(t *testing.T) {
 	}
 
 	tests := []struct {
-		submissions []models.Submission
+		submissions []ctf.Submission
 		expect      []Rank
 	}{
 		{
-			[]models.Submission{
+			[]ctf.Submission{
 				&jeopardySubmission{1, teams[0], chals[0], "flag1", true, time.Unix(1500883944, 0)},
 				&jeopardySubmission{2, teams[1], chals[0], "flag1", true, time.Unix(1500883950, 0)},
 				&jeopardySubmission{3, teams[2], chals[0], "flag1", true, time.Unix(1500884003, 0)},
@@ -72,7 +72,7 @@ func Test_FixedJeopardy_GetRanking(t *testing.T) {
 			},
 		},
 		{
-			[]models.Submission{
+			[]ctf.Submission{
 				&jeopardySubmission{1, teams[0], chals[0], "flag1", true, time.Unix(1500883944, 0)},
 				&jeopardySubmission{2, teams[1], chals[0], "flag1", true, time.Unix(1500883944, 0)},
 				&jeopardySubmission{3, teams[2], chals[0], "flag1", true, time.Unix(1500883944, 0)},

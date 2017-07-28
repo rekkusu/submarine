@@ -1,6 +1,6 @@
 package scoring
 
-import "github.com/activedefense/submarine/models"
+import "github.com/activedefense/submarine/ctf"
 
 type Scoring interface {
 	GetRanking() []Rank
@@ -8,6 +8,6 @@ type Scoring interface {
 
 type Rank struct {
 	Rank  int
-	Team  models.Team
+	Team  ctf.Team
 	Score int
 }

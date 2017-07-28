@@ -1,9 +1,9 @@
 package rules
 
-import "github.com/activedefense/submarine/models"
+import "github.com/activedefense/submarine/ctf"
 
 type JeopardyRule interface {
-	GetChallengeStore() models.ChallengeStore
-	GetTeamStore() models.TeamStore
-	GetSubmissionStore() models.SubmissionStore
+	GetChallengeStore() ctf.ChallengeStore
+	GetTeamStore() ctf.TeamStore
+	GetSubmissionStore() ctf.SubmissionStore
 }

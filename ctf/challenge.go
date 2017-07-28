@@ -1,4 +1,4 @@
-package models
+package ctf
 
 type Challenge interface {
 	GetID() int

@@ -1,4 +1,4 @@
-package models
+package ctf
 
 type Team interface {
 	GetID() int

@@ -5,7 +5,7 @@ import (
 	"sort"
 	"time"
 
-	"github.com/activedefense/submarine/models"
+	"github.com/activedefense/submarine/ctf"
 )
 
 type jeopardyChallenge struct {
@@ -38,8 +38,8 @@ func (c jeopardyChallenge) GetFlag() string {
 
 type jeopardySubmission struct {
 	ID          int
-	Team        models.Team
-	Challenge   models.Challenge
+	Team        ctf.Team
+	Challenge   ctf.Challenge
 	Answer      string
 	Correct     bool
 	SubmittedAt time.Time
@@ -49,15 +49,15 @@ func (s jeopardySubmission) GetID() int {
 	return s.ID
 }
 
-func (s jeopardySubmission) GetTeam() models.Team {
+func (s jeopardySubmission) GetTeam() ctf.Team {
 	return s.Team
 }
 
-func (s jeopardySubmission) GetUser() models.User {
+func (s jeopardySubmission) GetUser() ctf.User {
 	return nil
 }
 
-func (s jeopardySubmission) GetChallenge() models.Challenge {
+func (s jeopardySubmission) GetChallenge() ctf.Challenge {
 	return s.Challenge
 }
 
@@ -91,11 +91,11 @@ func (t team) GetName() string {
 }
 
 type challengeStore struct {
-	records map[int]models.Challenge
+	records map[int]ctf.Challenge
 }
 
-func (store *challengeStore) All() ([]models.Challenge, error) {
-	array := make([]models.Challenge, len(store.records))
+func (store *challengeStore) All() ([]ctf.Challenge, error) {
+	array := make([]ctf.Challenge, len(store.records))
 	i := 0
 	for _, item := range store.records {
 		array[i] = item
@@ -107,7 +107,7 @@ func (store *challengeStore) All() ([]models.Challenge, error) {
 	return array, nil
 }
 
-func (store *challengeStore) Get(id int) (models.Challenge, error) {
+func (store *challengeStore) Get(id int) (ctf.Challenge, error) {
 	val, ok := store.records[id]
 	if !ok {
 		return nil, errors.New("record not found")
@@ -115,17 +115,17 @@ func (store *challengeStore) Get(id int) (models.Challenge, error) {
 	return val, nil
 }
 
-func (store *challengeStore) Save(c models.Challenge) error {
+func (store *challengeStore) Save(c ctf.Challenge) error {
 	store.records[c.GetID()] = c
 	return nil
 }
 
 type submissionStore struct {
-	records map[int]models.Submission
+	records map[int]ctf.Submission
 }
 
-func (store *submissionStore) All() ([]models.Submission, error) {
-	array := make([]models.Submission, len(store.records))
+func (store *submissionStore) All() ([]ctf.Submission, error) {
+	array := make([]ctf.Submission, len(store.records))
 	i := 0
 	for _, item := range store.records {
 		array[i] = item
@@ -137,7 +137,7 @@ func (store *submissionStore) All() ([]models.Submission, error) {
 	return array, nil
 }
 
-func (store *submissionStore) Get(id int) (models.Submission, error) {
+func (store *submissionStore) Get(id int) (ctf.Submission, error) {
 	val, ok := store.records[id]
 	if !ok {
 		return nil, errors.New("record not found")
@@ -145,17 +145,17 @@ func (store *submissionStore) Get(id int) (models.Submission, error) {
 	return val, nil
 }
 
-func (store *submissionStore) Save(s models.Submission) error {
+func (store *submissionStore) Save(s ctf.Submission) error {
 	store.records[s.GetID()] = s
 	return nil
 }
 
 type teamStore struct {
-	records map[int]models.Team
+	records map[int]ctf.Team
 }
 
-func (store *teamStore) AllTeams() ([]models.Team, error) {
-	array := make([]models.Team, len(store.records))
+func (store *teamStore) AllTeams() ([]ctf.Team, error) {
+	array := make([]ctf.Team, len(store.records))
 	i := 0
 	for _, item := range store.records {
 		array[i] = item
@@ -167,7 +167,7 @@ func (store *teamStore) AllTeams() ([]models.Team, error) {
 	return array, nil
 }
 
-func (store *teamStore) GetTeam(id int) (models.Team, error) {
+func (store *teamStore) GetTeam(id int) (ctf.Team, error) {
 	val, ok := store.records[id]
 	if !ok {
 		return nil, errors.New("record not found")
@@ -175,25 +175,25 @@ func (store *teamStore) GetTeam(id int) (models.Team, error) {
 	return val, nil
 }
 
-func (store *teamStore) SaveTeam(t models.Team) error {
+func (store *teamStore) SaveTeam(t ctf.Team) error {
 	store.records[t.GetID()] = t
 	return nil
 }
 
 type jeopardy struct {
-	Challenge  models.ChallengeStore
-	Team       models.TeamStore
-	Submission models.SubmissionStore
+	Challenge  ctf.ChallengeStore
+	Team       ctf.TeamStore
+	Submission ctf.SubmissionStore
 }
 
-func (j jeopardy) GetChallengeStore() models.ChallengeStore {
+func (j jeopardy) GetChallengeStore() ctf.ChallengeStore {
 	return j.Challenge
 }
 
-func (j jeopardy) GetTeamStore() models.TeamStore {
+func (j jeopardy) GetTeamStore() ctf.TeamStore {
 	return j.Team
 }
 
-func (j jeopardy) GetSubmissionStore() models.SubmissionStore {
+func (j jeopardy) GetSubmissionStore() ctf.SubmissionStore {
 	return j.Submission
 }

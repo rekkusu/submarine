@@ -4,7 +4,7 @@ import (
 	"sort"
 	"time"
 
-	"github.com/activedefense/submarine/models"
+	"github.com/activedefense/submarine/ctf"
 	"github.com/activedefense/submarine/rules"
 )
 
@@ -13,7 +13,7 @@ type FixedJeopardy struct {
 }
 
 type status struct {
-	team  models.Team
+	team  ctf.Team
 	score int
 	last  time.Time
 }

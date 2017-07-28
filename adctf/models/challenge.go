@@ -1,8 +1,7 @@
-package adctf
+package models
 
 import (
-	"github.com/activedefense/submarine/models"
-
+	"github.com/activedefense/submarine/ctf"
 	"github.com/jinzhu/gorm"
 )
 
@@ -42,13 +41,13 @@ type ChallengeStore struct {
 	DB *gorm.DB
 }
 
-func (repo *ChallengeStore) All() ([]models.Challenge, error) {
+func (repo *ChallengeStore) All() ([]ctf.Challenge, error) {
 	var chals []Challenge
 	if err := repo.DB.Find(&chals).Error; err != nil {
 		return nil, err
 	}
 
-	result := make([]models.Challenge, len(chals))
+	result := make([]ctf.Challenge, len(chals))
 	for i, _ := range chals {
 		result[i] = &chals[i]
 	}
@@ -56,7 +55,7 @@ func (repo *ChallengeStore) All() ([]models.Challenge, error) {
 	return result, nil
 }
 
-func (repo *ChallengeStore) Get(id int) (models.Challenge, error) {
+func (repo *ChallengeStore) Get(id int) (ctf.Challenge, error) {
 	var chal Challenge
 	if err := repo.DB.First(&chal, id).Error; err != nil {
 		return nil, err
@@ -64,10 +63,10 @@ func (repo *ChallengeStore) Get(id int) (models.Challenge, error) {
 	return &chal, nil
 }
 
-func (repo *ChallengeStore) Save(c models.Challenge) error {
+func (repo *ChallengeStore) Save(c ctf.Challenge) error {
 	chal, ok := c.(*Challenge)
 	if !ok {
-		return models.ErrModelMismatched
+		return ctf.ErrModelMismatched
 	}
 	return repo.DB.Create(&chal).Error
 }

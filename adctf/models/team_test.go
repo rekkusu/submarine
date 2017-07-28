@@ -1,10 +1,10 @@
-package adctf
+package models
 
 import (
 	"encoding/json"
 	"testing"
 
-	"github.com/activedefense/submarine/models"
+	"github.com/activedefense/submarine/ctf"
 	sqlite3 "github.com/mattn/go-sqlite3"
 	"github.com/stretchr/testify/assert"
 )
@@ -32,7 +32,7 @@ func TestTeamStoreGetTeam(t *testing.T) {
 
 	tests := []struct {
 		id     int
-		expect models.Team
+		expect ctf.Team
 	}{
 		{1, expect[0]},
 		{100, nil},
@@ -51,7 +51,7 @@ func TestTeamStoreSaveTeam(t *testing.T) {
 	repo := TeamStore{db}
 
 	tests := []struct {
-		team   models.Team
+		team   ctf.Team
 		expect error
 	}{
 		{
@@ -64,7 +64,7 @@ func TestTeamStoreSaveTeam(t *testing.T) {
 		},
 		{
 			&fakeTeam{},
-			models.ErrModelMismatched,
+			ctf.ErrModelMismatched,
 		},
 	}
 

@@ -1,9 +1,9 @@
-package adctf
+package models
 
 import (
 	"time"
 
-	"github.com/activedefense/submarine/models"
+	"github.com/activedefense/submarine/ctf"
 
 	"github.com/jinzhu/gorm"
 )
@@ -26,15 +26,15 @@ func (s Submission) GetID() int {
 	return s.ID
 }
 
-func (s Submission) GetTeam() models.Team {
+func (s Submission) GetTeam() ctf.Team {
 	return s.Team
 }
 
-func (s Submission) GetUser() models.User {
+func (s Submission) GetUser() ctf.User {
 	return s.User
 }
 
-func (s Submission) GetChallenge() models.Challenge {
+func (s Submission) GetChallenge() ctf.Challenge {
 	return s.Challenge
 }
 
@@ -58,13 +58,13 @@ type SubmissionStore struct {
 	DB *gorm.DB
 }
 
-func (store *SubmissionStore) All() ([]models.Submission, error) {
+func (store *SubmissionStore) All() ([]ctf.Submission, error) {
 	var submissions []Submission
 	if err := store.DB.Preload("Team").Preload("Challenge").Find(&submissions).Error; err != nil {
 		return nil, err
 	}
 
-	result := make([]models.Submission, len(submissions))
+	result := make([]ctf.Submission, len(submissions))
 	for i, _ := range submissions {
 		result[i] = &submissions[i]
 	}
@@ -72,7 +72,7 @@ func (store *SubmissionStore) All() ([]models.Submission, error) {
 	return result, nil
 }
 
-func (store *SubmissionStore) Get(id int) (models.Submission, error) {
+func (store *SubmissionStore) Get(id int) (ctf.Submission, error) {
 	var sub Submission
 	if err := store.DB.Preload("Team").Preload("Challenge").First(&sub, id).Error; err != nil {
 		return nil, err
@@ -80,10 +80,10 @@ func (store *SubmissionStore) Get(id int) (models.Submission, error) {
 	return &sub, nil
 }
 
-func (store *SubmissionStore) Save(s models.Submission) error {
+func (store *SubmissionStore) Save(s ctf.Submission) error {
 	sub, ok := s.(*Submission)
 	if !ok {
-		return models.ErrModelMismatched
+		return ctf.ErrModelMismatched
 	}
 	return store.DB.Create(&sub).Error
 }
