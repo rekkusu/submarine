@@ -37,6 +37,24 @@ func (c Challenge) GetFlag() string {
 	return c.Flag
 }
 
+func (c Challenge) Submit(team ctf.Team, answer string) ctf.Submission {
+	score := 0
+	correct := false
+
+	if c.GetFlag() == answer {
+		score = c.GetPoint()
+		correct = true
+	}
+
+	return &Submission{
+		Team:      team.(*Team),
+		Challenge: &c,
+		Answer:    answer,
+		Score:     score,
+		Correct:   correct,
+	}
+}
+
 type ChallengeStore struct {
 	DB *gorm.DB
 }

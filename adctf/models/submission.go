@@ -10,9 +10,9 @@ import (
 
 type Submission struct {
 	ID          int        `json:"id" gorm:"primary_key;AUTO_INCREMENT"`
-	Team        *Team      `json:"team" gorm:"ForeignKey:TeamID"`
+	Team        *Team      `json:"team,omitempty" gorm:"ForeignKey:TeamID"`
 	TeamID      int        `json:"-"`
-	Challenge   *Challenge `json:"challenge" gorm:"ForeignKey:ChallengeID"`
+	Challenge   *Challenge `json:"challenge,omitempty" gorm:"ForeignKey:ChallengeID"`
 	ChallengeID int        `json:"-"`
 	Answer      string     `json:"answer"`
 	Score       int        `json:"score"`
