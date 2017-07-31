@@ -7,7 +7,7 @@ import (
 
 type Team struct {
 	ID       int    `json:"id"`
-	Username string `json:"username"`
+	Username string `json:"username" gorm:"unique_index"`
 	Password string `json:"-"`
 }
 
@@ -52,6 +52,14 @@ func (store *TeamStore) AllTeams() ([]ctf.Team, error) {
 func (store *TeamStore) GetTeam(id int) (ctf.Team, error) {
 	var t Team
 	if err := store.DB.First(&t, id).Error; err != nil {
+		return nil, err
+	}
+	return &t, nil
+}
+
+func (store *TeamStore) GetTeamByName(name string) (ctf.Team, error) {
+	var t Team
+	if err := store.DB.First(&t, "username=?", name).Error; err != nil {
 		return nil, err
 	}
 	return &t, nil
