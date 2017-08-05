@@ -6,6 +6,10 @@ import (
 )
 
 func main() {
-	server := adctf.New()
+	server := adctf.New(adctf.ADCTFConfig{
+		DriverName:     "sqlite3",
+		DataSourceName: ":memory:?parseTime=true",
+		JWTSecret:      []byte("e81061ace8c9e0b568c00075ecda0d8c42dc265669f52d7d680f85dace1386e5"),
+	})
 	server.Start("127.0.0.1:8000")
 }

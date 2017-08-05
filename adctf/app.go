@@ -9,8 +9,15 @@ import (
 	"github.com/labstack/echo/middleware"
 )
 
-func New() *echo.Echo {
-	db, _ := gorm.Open("sqlite3", ":memory:?parseTime=true")
+type ADCTFConfig struct {
+	DriverName     string
+	DataSourceName string
+	JWTSecret      []byte
+	Debug          bool
+}
+
+func New(config ADCTFConfig) *echo.Echo {
+	db, _ := gorm.Open(config.DriverName, config.DataSourceName)
 	db.AutoMigrate(&models.Challenge{}, &models.Submission{}, &models.Team{})
 
 	jeopardy := &Jeopardy{
@@ -20,13 +27,13 @@ func New() *echo.Echo {
 	}
 
 	e := echo.New()
-	e.Debug = true
+	e.Debug = config.Debug
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 
 	jwtconf := middleware.DefaultJWTConfig
 	jwtconf.ContextKey = "jwt"
-	jwtconf.SigningKey = []byte("secret")
+	jwtconf.SigningKey = config.JWTSecret
 
 	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
