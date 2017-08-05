@@ -37,6 +37,7 @@ func Signup(c echo.Context) error {
 	team := &models.Team{
 		Username: form.Username,
 		Password: string(passhash),
+		Role:     "normal",
 	}
 
 	store, _ := c.Get("jeopardy").(rules.JeopardyRule).GetTeamStore().(*models.TeamStore)
@@ -81,8 +82,11 @@ func Signin(c echo.Context) error {
 	token := jwt.New(jwt.SigningMethodHS256)
 	claims := token.Claims.(jwt.MapClaims)
 	claims["user"] = team.(ctf.User).GetID()
+	claims["role"] = team.(*models.Team).Role
 
-	t, err := token.SignedString([]byte("secret"))
+	key := c.Get("secret").([]byte)
+
+	t, err := token.SignedString(key)
 	if err != nil {
 		return err
 	}

@@ -9,6 +9,7 @@ type Team struct {
 	ID       int    `json:"id"`
 	Username string `json:"username" gorm:"unique_index"`
 	Password string `json:"-"`
+	Role     string `json:"role"`
 }
 
 func (t Team) GetID() int {

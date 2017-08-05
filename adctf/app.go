@@ -4,6 +4,7 @@ import (
 	"github.com/activedefense/submarine/adctf/handlers"
 	"github.com/activedefense/submarine/adctf/models"
 	"github.com/activedefense/submarine/ctf"
+	"github.com/casbin/casbin"
 	"github.com/jinzhu/gorm"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
@@ -16,9 +17,15 @@ type ADCTFConfig struct {
 	Debug          bool
 }
 
+const (
+	JWTKey = "jwt"
+)
+
 func New(config ADCTFConfig) *echo.Echo {
 	db, _ := gorm.Open(config.DriverName, config.DataSourceName)
 	db.AutoMigrate(&models.Challenge{}, &models.Submission{}, &models.Team{})
+
+	enforcer := initEnforcer(config)
 
 	jeopardy := &Jeopardy{
 		Challenge:  &models.ChallengeStore{db},
@@ -30,13 +37,21 @@ func New(config ADCTFConfig) *echo.Echo {
 	e.Debug = config.Debug
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
-
-	jwtconf := middleware.DefaultJWTConfig
-	jwtconf.ContextKey = "jwt"
-	jwtconf.SigningKey = config.JWTSecret
+	e.Use(middleware.JWTWithConfig(middleware.JWTConfig{
+		ContextKey: JWTKey,
+		SigningKey: config.JWTSecret,
+		Skipper: func(c echo.Context) bool {
+			if c.Request().Header.Get("Authorization") == "" {
+				return true
+			}
+			return false
+		},
+	}))
+	e.Use(CasbinMiddleware(enforcer))
 
 	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
+			c.Set("secret", config.JWTSecret)
 			c.Set("jeopardy", jeopardy)
 			return next(c)
 		}
@@ -51,7 +66,6 @@ func New(config ADCTFConfig) *echo.Echo {
 
 	{
 		chals := e.Group("/api/v1/challenges")
-		chals.Use(middleware.JWTWithConfig(jwtconf))
 		chals.GET("", handlers.GetChallenges)
 		chals.POST("", handlers.NewChallenge)
 		chals.GET("/:id", handlers.GetChallengeByID)
@@ -66,7 +80,6 @@ func New(config ADCTFConfig) *echo.Echo {
 
 	{
 		me := e.Group("/api/v1/me")
-		me.Use(middleware.JWTWithConfig(jwtconf))
 		me.GET("", handlers.Me)
 	}
 
@@ -89,4 +102,10 @@ func (j Jeopardy) GetTeamStore() ctf.TeamStore {
 
 func (j Jeopardy) GetSubmissionStore() ctf.SubmissionStore {
 	return j.Submission
+}
+
+func initEnforcer(config ADCTFConfig) *casbin.Enforcer {
+	enforcer := casbin.NewEnforcer("adctf/policy.conf", "adctf/policy.csv")
+
+	return enforcer
 }

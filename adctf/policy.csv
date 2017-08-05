@@ -1,0 +1,13 @@
+p, noauth, /api/v1/teams/:id, GET
+p, noauth, /api/v1/teams, GET
+p, noauth, /api/v1/users/signup, POST
+p, noauth, /api/v1/users/signin, POST
+
+p, normal, /api/v1/challenges, GET
+p, normal, /api/v1/challenges/:id, GET
+p, normal, /api/v1/challenges/:id/submit, POST
+
+p, admin, /api/v1/challenges, POST
+
+g, normal, noauth
+g, admin, registered
