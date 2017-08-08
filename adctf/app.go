@@ -78,6 +78,8 @@ func New(config ADCTFConfig) *echo.Echo {
 		users.POST("/signin", handlers.Signin)
 	}
 
+	e.GET("/api/v1/scoreboard", handlers.GetScoreboard)
+
 	{
 		me := e.Group("/api/v1/me")
 		me.GET("", handlers.Me)

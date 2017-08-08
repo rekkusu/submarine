@@ -7,7 +7,7 @@ type Scoring interface {
 }
 
 type Rank struct {
-	Rank  int
-	Team  ctf.Team
-	Score int
+	Rank  int      `json:"rank"`
+	Team  ctf.Team `json:"team"`
+	Score int      `json:"score"`
 }

@@ -17,6 +17,7 @@ type status struct {
 	score int
 	last  time.Time
 }
+
 type ranking []*status
 
 func (r ranking) Len() int {
