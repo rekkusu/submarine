@@ -1,7 +1,7 @@
 package scoring
 
 import (
-	"reflect"
+	"sort"
 	"testing"
 	"time"
 
@@ -48,43 +48,43 @@ func Test_FixedJeopardy_GetRanking(t *testing.T) {
 
 	tests := []struct {
 		submissions []ctf.Submission
-		expect      []Rank
+		expect      Scores
 	}{
 		{
 			[]ctf.Submission{
-				&jeopardySubmission{1, teams[0], chals[0], "flag1", true, time.Unix(1500883944, 0)},
-				&jeopardySubmission{2, teams[1], chals[0], "flag1", true, time.Unix(1500883950, 0)},
-				&jeopardySubmission{3, teams[2], chals[0], "flag1", true, time.Unix(1500884003, 0)},
-				&jeopardySubmission{4, teams[2], chals[2], "flagX", false, time.Unix(1500884024, 0)},
-				&jeopardySubmission{5, teams[2], chals[2], "flag3", true, time.Unix(1500884028, 0)},
-				&jeopardySubmission{6, teams[4], chals[0], "flag1", true, time.Unix(1500884071, 0)},
-				&jeopardySubmission{7, teams[5], chals[0], "flag1", true, time.Unix(1500884072, 0)},
-				&jeopardySubmission{8, teams[6], chals[0], "flag1", true, time.Unix(1500884092, 0)},
+				&jeopardySubmission{1, teams[0], chals[0], "flag1", true, time.Date(2017, 8, 1, 12, 0, 0, 0, time.UTC)},
+				&jeopardySubmission{2, teams[1], chals[0], "flag1", true, time.Date(2017, 8, 1, 12, 30, 0, 0, time.UTC)},
+				&jeopardySubmission{3, teams[2], chals[0], "flag1", true, time.Date(2017, 8, 1, 13, 30, 0, 0, time.UTC)},
+				&jeopardySubmission{4, teams[2], chals[2], "flagX", false, time.Date(2017, 8, 1, 14, 0, 0, 0, time.UTC)},
+				&jeopardySubmission{5, teams[2], chals[2], "flag3", true, time.Date(2017, 8, 1, 15, 0, 0, 0, time.UTC)},
+				&jeopardySubmission{6, teams[4], chals[0], "flag1", true, time.Date(2017, 8, 1, 18, 0, 0, 0, time.UTC)},
+				&jeopardySubmission{7, teams[5], chals[0], "flag1", true, time.Date(2017, 8, 1, 18, 0, 0, 0, time.UTC)},
+				&jeopardySubmission{8, teams[6], chals[0], "flag1", true, time.Date(2017, 8, 1, 18, 0, 0, 0, time.UTC)},
 			},
-			[]Rank{
-				Rank{1, teams[2], 500},
-				Rank{2, teams[0], 100},
-				Rank{3, teams[1], 100},
-				Rank{4, teams[4], 100},
-				Rank{5, teams[5], 100},
-				Rank{6, teams[6], 100},
-				Rank{7, teams[3], 0},
+			Scores{
+				score{teams[2], 500, time.Date(2017, 8, 1, 15, 0, 0, 0, time.UTC)},
+				score{teams[0], 100, time.Date(2017, 8, 1, 12, 0, 0, 0, time.UTC)},
+				score{teams[1], 100, time.Date(2017, 8, 1, 15, 30, 0, 0, time.UTC)},
+				score{teams[4], 100, time.Date(2017, 8, 1, 18, 0, 0, 0, time.UTC)},
+				score{teams[5], 100, time.Date(2017, 8, 1, 18, 0, 0, 0, time.UTC)},
+				score{teams[6], 100, time.Date(2017, 8, 1, 18, 0, 0, 0, time.UTC)},
+				score{teams[3], 0, time.Time{}},
 			},
 		},
 		{
 			[]ctf.Submission{
-				&jeopardySubmission{1, teams[0], chals[0], "flag1", true, time.Unix(1500883944, 0)},
-				&jeopardySubmission{2, teams[1], chals[0], "flag1", true, time.Unix(1500883944, 0)},
-				&jeopardySubmission{3, teams[2], chals[0], "flag1", true, time.Unix(1500883944, 0)},
+				&jeopardySubmission{1, teams[0], chals[0], "flag1", true, time.Time{}},
+				&jeopardySubmission{2, teams[1], chals[0], "flag1", true, time.Time{}},
+				&jeopardySubmission{3, teams[2], chals[0], "flag1", true, time.Time{}},
 			},
-			[]Rank{
-				Rank{1, teams[0], 100},
-				Rank{2, teams[1], 100},
-				Rank{3, teams[2], 100},
-				Rank{4, teams[3], 0},
-				Rank{5, teams[4], 0},
-				Rank{6, teams[5], 0},
-				Rank{7, teams[6], 0},
+			Scores{
+				score{teams[0], 100, time.Time{}},
+				score{teams[1], 100, time.Time{}},
+				score{teams[2], 100, time.Time{}},
+				score{teams[3], 0, time.Time{}},
+				score{teams[4], 0, time.Time{}},
+				score{teams[5], 0, time.Time{}},
+				score{teams[6], 0, time.Time{}},
 			},
 		},
 	}
@@ -92,22 +92,21 @@ func Test_FixedJeopardy_GetRanking(t *testing.T) {
 	for _, test := range tests {
 		rule := genJeopardy(chals, teams, test.submissions)
 		scoring := FixedJeopardy{rule}
-		ranks := scoring.GetRanking()
+		ranks := scoring.GetScores()
+		sort.Stable(ranks)
 
 		if len(test.expect) != len(ranks) {
 			t.Errorf("len(GetRanking()) = %d, want %d\n", len(ranks), len(test.expect))
 		}
-		if !reflect.DeepEqual(test.expect, ranks) {
-			for i := 0; i < len(test.expect); i++ {
-				if !reflect.DeepEqual(test.expect[i], ranks[i]) {
-					t.Errorf("(%d)%s/%d != (%d)%s/%d\n",
-						test.expect[i].Rank, test.expect[i].Team.GetName(), test.expect[i].Score,
-						ranks[i].Rank, ranks[i].Team.GetName(), ranks[i].Score)
-				} else {
-					t.Logf("(%d)%s/%d == (%d)%s/%d\n",
-						test.expect[i].Rank, test.expect[i].Team.GetName(), test.expect[i].Score,
-						ranks[i].Rank, ranks[i].Team.GetName(), ranks[i].Score)
-				}
+		for i := 0; i < len(test.expect); i++ {
+			if test.expect[i].GetScore() != ranks[i].GetScore() || test.expect[i].GetTeam().GetName() != ranks[i].GetTeam().GetName() {
+				t.Errorf("%s/%d != %s/%d\n",
+					test.expect[i].GetTeam().GetName(), test.expect[i].GetScore(),
+					ranks[i].GetTeam().GetName(), ranks[i].GetScore())
+			} else {
+				t.Errorf("%s/%d == %s/%d\n",
+					test.expect[i].GetTeam().GetName(), test.expect[i].GetScore(),
+					ranks[i].GetTeam().GetName(), ranks[i].GetScore())
 			}
 		}
 	}
