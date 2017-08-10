@@ -25,6 +25,7 @@ func (s Scores) Less(i, j int) bool {
 }
 
 type Score interface {
+	GetTeam() ctf.Team
 	GetScore() int
 	GetLastSubmission() time.Time
 	LessThan(Score) bool
@@ -34,6 +35,10 @@ type score struct {
 	Team           ctf.Team  `json:"team"`
 	Score          int       `json:"score"`
 	LastSubmission time.Time `json:"last_submission"`
+}
+
+func (s score) GetTeam() ctf.Team {
+	return s.Team
 }
 
 func (s score) GetScore() int {
