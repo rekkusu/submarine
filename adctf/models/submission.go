@@ -1,11 +1,16 @@
 package models
 
 import (
+	"errors"
 	"time"
 
 	"github.com/activedefense/submarine/ctf"
 
 	"github.com/jinzhu/gorm"
+)
+
+var (
+	ErrChallengeHasAlreadySolved = errors.New("the challenge has already solved")
 )
 
 type Submission struct {
@@ -83,5 +88,23 @@ func (store *SubmissionStore) Save(s ctf.Submission) error {
 	if !ok {
 		return ctf.ErrModelMismatched
 	}
-	return store.DB.Create(&sub).Error
+
+	tx := store.DB.Begin()
+
+	// check if the chal is already solved
+	solved := !tx.Where("team_id = ? AND challenge_id = ? AND correct = 1", sub.Team.GetID(), sub.Challenge.GetID()).Find(&Submission{}).RecordNotFound()
+
+	if solved {
+		tx.Commit()
+		return ErrChallengeHasAlreadySolved
+	}
+
+	if err := tx.Create(&sub).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	tx.Commit()
+
+	return nil
 }

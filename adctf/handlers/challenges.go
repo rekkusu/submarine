@@ -99,6 +99,9 @@ func Submit(c echo.Context) error {
 	sub := chal.(*models.Challenge).Submit(team, form.Answer)
 
 	if err := j.GetSubmissionStore().Save(sub); err != nil {
+		if err == models.ErrChallengeHasAlreadySolved {
+			return echo.NewHTTPError(http.StatusConflict, err.Error())
+		}
 		return err
 	}
 

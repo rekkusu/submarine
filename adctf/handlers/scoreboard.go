@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"sort"
 
 	"github.com/activedefense/submarine/rules"
 	"github.com/activedefense/submarine/scoring"
@@ -11,7 +12,10 @@ import (
 func GetScoreboard(c echo.Context) error {
 	j, _ := c.Get("jeopardy").(rules.JeopardyRule)
 
-	score := scoring.FixedJeopardy{j}
-	ranks := score.GetRanking()
-	return c.JSON(http.StatusOK, ranks)
+	scoring := scoring.FixedJeopardy{j}
+	scores := scoring.GetScores()
+
+	sort.Stable(scores)
+
+	return c.JSON(http.StatusOK, scores)
 }
