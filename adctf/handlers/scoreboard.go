@@ -10,6 +10,12 @@ import (
 )
 
 func GetScoreboard(c echo.Context) error {
+	type record struct {
+		Order int    `json:"order"`
+		Name  string `json:"name"`
+		Score int    `json:"score"`
+	}
+
 	j, _ := c.Get("jeopardy").(rules.JeopardyRule)
 
 	scoring := scoring.FixedJeopardy{j}
@@ -17,5 +23,14 @@ func GetScoreboard(c echo.Context) error {
 
 	sort.Stable(scores)
 
-	return c.JSON(http.StatusOK, scores)
+	result := make([]record, len(scores))
+	for i, item := range scores {
+		result[i] = record{
+			Order: i + 1,
+			Name:  item.GetTeam().GetName(),
+			Score: item.GetScore(),
+		}
+	}
+
+	return c.JSON(http.StatusOK, result)
 }
