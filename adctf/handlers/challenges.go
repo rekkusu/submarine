@@ -41,6 +41,7 @@ func GetChallengeByID(c echo.Context) error {
 
 func NewChallenge(c echo.Context) error {
 	var form struct {
+		CategoryID  int    `json:"category_id"`
 		Title       string `json:"title"`
 		Point       int    `json:"point"`
 		Description string `json:"description"`
@@ -52,6 +53,7 @@ func NewChallenge(c echo.Context) error {
 	}
 
 	chal := &models.Challenge{
+		CategoryID:  form.CategoryID,
 		Title:       form.Title,
 		Point:       form.Point,
 		Description: form.Description,
@@ -106,4 +108,52 @@ func Submit(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusAccepted, sub)
+}
+
+func CreateCategory(c echo.Context) error {
+	var category models.Category
+
+	if err := c.Bind(&category); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Bad Request")
+	}
+
+	if err := c.Validate(category); err != nil {
+		return err
+	}
+
+	db := c.Get("jeopardy").(rules.JeopardyRule).GetDB()
+	if err := category.Create(db); err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusCreated, category)
+}
+
+func UpdateCategory(c echo.Context) error {
+	var category models.Category
+
+	if err := c.Bind(&category); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Bad Request")
+	}
+
+	if err := c.Validate(category); err != nil {
+		return err
+	}
+
+	db := c.Get("jeopardy").(rules.JeopardyRule).GetDB()
+	if err := category.Save(db); err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusCreated, category)
+}
+
+func GetCategories(c echo.Context) error {
+	db := c.Get("jeopardy").(rules.JeopardyRule).GetDB()
+	cates, err := models.GetCategories(db)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusOK, cates)
 }

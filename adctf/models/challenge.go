@@ -7,6 +7,7 @@ import (
 
 type Challenge struct {
 	ID          int    `gorm:"primary_key;AUTO_INCREMENT" json:"id"`
+	CategoryID  int    `json:"category_id"`
 	Title       string `json:"title"`
 	Point       int    `json:"point"`
 	Description string `json:"description"`

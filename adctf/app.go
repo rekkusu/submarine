@@ -1,6 +1,9 @@
 package adctf
 
 import (
+	"reflect"
+	"strings"
+
 	"github.com/activedefense/submarine/adctf/handlers"
 	"github.com/activedefense/submarine/adctf/models"
 	"github.com/activedefense/submarine/ctf"
@@ -8,6 +11,7 @@ import (
 	"github.com/jinzhu/gorm"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
+	validator "gopkg.in/go-playground/validator.v9"
 )
 
 type ADCTFConfig struct {
@@ -23,11 +27,12 @@ const (
 
 func New(config ADCTFConfig) *echo.Echo {
 	db, _ := gorm.Open(config.DriverName, config.DataSourceName)
-	db.AutoMigrate(&models.Challenge{}, &models.Submission{}, &models.Team{})
+	db.AutoMigrate(&models.Challenge{}, &models.Submission{}, &models.Team{}, &models.Category{})
 
 	enforcer := initEnforcer(config)
 
 	jeopardy := &Jeopardy{
+		DB:         db,
 		Challenge:  &models.ChallengeStore{db},
 		Submission: &models.SubmissionStore{db},
 		Team:       &models.TeamStore{db},
@@ -57,6 +62,19 @@ func New(config ADCTFConfig) *echo.Echo {
 		}
 	})
 
+	validate := validator.New()
+	validate.RegisterTagNameFunc(func(fld reflect.StructField) string {
+		name := strings.SplitN(fld.Tag.Get("json"), ",", 2)[0]
+
+		if name == "-" {
+			return ""
+		}
+
+		return name
+	})
+
+	e.Validator = &CustomValidator{validate}
+
 	{
 		teams := e.Group("/api/v1/teams")
 		teams.GET("", handlers.GetTeams)
@@ -70,6 +88,13 @@ func New(config ADCTFConfig) *echo.Echo {
 		chals.POST("", handlers.NewChallenge)
 		chals.GET("/:id", handlers.GetChallengeByID)
 		chals.POST("/:id/submit", handlers.Submit)
+	}
+
+	{
+		cate := e.Group("/api/v1/categories")
+		cate.GET("", handlers.GetCategories)
+		cate.POST("", handlers.CreateCategory)
+		cate.PUT("/:id", handlers.UpdateCategory)
 	}
 
 	{
@@ -88,10 +113,23 @@ func New(config ADCTFConfig) *echo.Echo {
 	return e
 }
 
+type CustomValidator struct {
+	validate *validator.Validate
+}
+
+func (cv *CustomValidator) Validate(i interface{}) error {
+	return cv.validate.Struct(i)
+}
+
 type Jeopardy struct {
+	DB         *gorm.DB
 	Challenge  ctf.ChallengeStore
 	Team       ctf.TeamStore
 	Submission ctf.SubmissionStore
+}
+
+func (j Jeopardy) GetDB() *gorm.DB {
+	return j.DB
 }
 
 func (j Jeopardy) GetChallengeStore() ctf.ChallengeStore {
