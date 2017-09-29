@@ -9,8 +9,11 @@ p, normal, /api/v1/me, GET
 p, normal, /api/v1/challenges, GET
 p, normal, /api/v1/challenges/:id, GET
 p, normal, /api/v1/challenges/:id/submit, POST
+p, normal, /api/v1/categories, GET
 
 p, admin, /api/v1/challenges, POST
+p, admin, /api/v1/categories, POST
+p, admin, /api/v1/categories/:id, PUT
 
 g, normal, noauth
 g, admin, normal

@@ -11,21 +11,17 @@ import (
 
 func genJeopardy(chals []ctf.Challenge, teams []ctf.Team, submissions []ctf.Submission) rules.JeopardyRule {
 	rule := jeopardy{
-		Challenge:  &challengeStore{make(map[int]ctf.Challenge)},
-		Submission: &submissionStore{make(map[int]ctf.Submission)},
-		Team:       &teamStore{make(map[int]ctf.Team)},
+		Submission: make([]ctf.Submission, 0),
+		Team:       make([]ctf.Team, 0),
 	}
-	for _, item := range chals {
-		rule.Challenge.Save(item)
+	for _, item := range submissions {
+		rule.Submission = append(rule.Submission, item)
 	}
 
 	for _, item := range teams {
-		rule.Team.SaveTeam(item)
+		rule.Team = append(rule.Team, item)
 	}
 
-	for _, item := range submissions {
-		rule.Submission.Save(item)
-	}
 	return rule
 }
 
@@ -98,15 +94,23 @@ func Test_FixedJeopardy_GetRanking(t *testing.T) {
 		if len(test.expect) != len(ranks) {
 			t.Errorf("len(GetRanking()) = %d, want %d\n", len(ranks), len(test.expect))
 		}
+		hasError := false
 		for i := 0; i < len(test.expect); i++ {
 			if test.expect[i].GetScore() != ranks[i].GetScore() || test.expect[i].GetTeam().GetName() != ranks[i].GetTeam().GetName() {
-				t.Errorf("%s/%d != %s/%d\n",
-					test.expect[i].GetTeam().GetName(), test.expect[i].GetScore(),
-					ranks[i].GetTeam().GetName(), ranks[i].GetScore())
-			} else {
-				t.Errorf("%s/%d == %s/%d\n",
-					test.expect[i].GetTeam().GetName(), test.expect[i].GetScore(),
-					ranks[i].GetTeam().GetName(), ranks[i].GetScore())
+				hasError = true
+			}
+		}
+		if hasError {
+			for i := 0; i < len(test.expect); i++ {
+				if test.expect[i].GetScore() != ranks[i].GetScore() || test.expect[i].GetTeam().GetName() != ranks[i].GetTeam().GetName() {
+					t.Errorf("%s/%d != %s/%d\n",
+						test.expect[i].GetTeam().GetName(), test.expect[i].GetScore(),
+						ranks[i].GetTeam().GetName(), ranks[i].GetScore())
+				} else {
+					t.Errorf("%s/%d == %s/%d\n",
+						test.expect[i].GetTeam().GetName(), test.expect[i].GetScore(),
+						ranks[i].GetTeam().GetName(), ranks[i].GetScore())
+				}
 			}
 		}
 	}

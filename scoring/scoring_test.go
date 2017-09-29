@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/activedefense/submarine/ctf"
+	"github.com/jinzhu/gorm"
 )
 
 type jeopardyChallenge struct {
@@ -181,19 +182,27 @@ func (store *teamStore) SaveTeam(t ctf.Team) error {
 }
 
 type jeopardy struct {
-	Challenge  ctf.ChallengeStore
-	Team       ctf.TeamStore
-	Submission ctf.SubmissionStore
+	Team       []ctf.Team
+	Submission []ctf.Submission
 }
 
-func (j jeopardy) GetChallengeStore() ctf.ChallengeStore {
-	return j.Challenge
+func (j jeopardy) GetDB() *gorm.DB {
+	return nil
 }
 
-func (j jeopardy) GetTeamStore() ctf.TeamStore {
-	return j.Team
+func (j jeopardy) GetSubmissions() ([]ctf.Submission, error) {
+	return j.Submission, nil
 }
 
-func (j jeopardy) GetSubmissionStore() ctf.SubmissionStore {
-	return j.Submission
+func (j jeopardy) GetTeams() ([]ctf.Team, error) {
+	return j.Team, nil
+}
+
+func (j jeopardy) GetTeam(id int) (ctf.Team, error) {
+	for _, item := range j.Team {
+		if item.GetID() == id {
+			return item, nil
+		}
+	}
+	return nil, errors.New("not found")
 }

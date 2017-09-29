@@ -4,16 +4,14 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/activedefense/submarine/ctf"
 	sqlite3 "github.com/mattn/go-sqlite3"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestTeamStoreAllTeam(t *testing.T) {
+func TestGetTeams(t *testing.T) {
 	db, _, _, expect := initDB()
-	repo := TeamStore{db}
 
-	teams, err := repo.AllTeams()
+	teams, err := GetTeams(db)
 	if err != nil {
 		t.Error(err)
 		return
@@ -26,32 +24,30 @@ func TestTeamStoreAllTeam(t *testing.T) {
 	}
 }
 
-func TestTeamStoreGetTeam(t *testing.T) {
+func TestGetTeam(t *testing.T) {
 	db, _, _, expect := initDB()
-	repo := TeamStore{db}
 
 	tests := []struct {
 		id     int
-		expect ctf.Team
+		expect *Team
 	}{
 		{1, expect[0]},
 		{100, nil},
 	}
 
 	for _, test := range tests {
-		team, _ := repo.GetTeam(test.id)
+		team, _ := GetTeam(db, test.id)
 		expect, _ := json.Marshal(test.expect)
 		actual, _ := json.Marshal(team)
 		assert.JSONEq(t, string(expect), string(actual))
 	}
 }
 
-func TestTeamStoreSaveTeam(t *testing.T) {
+func TestTeamCreate(t *testing.T) {
 	db, _, _, _ := initDB()
-	repo := TeamStore{db}
 
 	tests := []struct {
-		team   ctf.Team
+		team   *Team
 		expect error
 	}{
 		{
@@ -62,14 +58,10 @@ func TestTeamStoreSaveTeam(t *testing.T) {
 			&Team{ID: 1, Username: "test2"},
 			sqlite3.ErrConstraintPrimaryKey,
 		},
-		{
-			&fakeTeam{},
-			ctf.ErrModelMismatched,
-		},
 	}
 
 	for _, test := range tests {
-		err := repo.SaveTeam(test.team)
+		err := test.team.Create(db)
 
 		if actual, ok := err.(sqlite3.Error); ok {
 			assert.Error(t, actual)
@@ -78,8 +70,4 @@ func TestTeamStoreSaveTeam(t *testing.T) {
 			assert.Equal(t, test.expect, err, "")
 		}
 	}
-}
-
-type fakeTeam struct {
-	Team
 }

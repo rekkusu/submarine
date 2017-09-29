@@ -9,7 +9,7 @@ import (
 
 func GetSubmissions(c echo.Context) error {
 	j, _ := c.Get("jeopardy").(rules.JeopardyRule)
-	subs, err := j.GetSubmissionStore().All()
+	subs, err := j.GetSubmissions()
 	if err != nil {
 		return err
 	}
