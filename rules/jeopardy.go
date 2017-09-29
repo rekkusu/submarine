@@ -7,7 +7,7 @@ import (
 
 type JeopardyRule interface {
 	GetDB() *gorm.DB
-	GetChallengeStore() ctf.ChallengeStore
-	GetTeamStore() ctf.TeamStore
-	GetSubmissionStore() ctf.SubmissionStore
+	GetSubmissions() ([]ctf.Submission, error)
+	GetTeams() ([]ctf.Team, error)
+	GetTeam(id int) (ctf.Team, error)
 }

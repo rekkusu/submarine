@@ -14,10 +14,6 @@ type Challenge struct {
 	Flag        string `json:"-"`
 }
 
-func (c Challenge) TableName() string {
-	return "challenges"
-}
-
 func (c Challenge) GetID() int {
 	return c.ID
 }
@@ -38,7 +34,15 @@ func (c Challenge) GetFlag() string {
 	return c.Flag
 }
 
-func (c Challenge) Submit(team ctf.Team, answer string) ctf.Submission {
+func (c *Challenge) Create(db *gorm.DB) error {
+	return db.Create(c).Error
+}
+
+func (c *Challenge) Save(db *gorm.DB) error {
+	return db.Save(c).Error
+}
+
+func (c Challenge) Submit(team ctf.Team, answer string) *Submission {
 	score := 0
 	correct := false
 
@@ -56,36 +60,16 @@ func (c Challenge) Submit(team ctf.Team, answer string) ctf.Submission {
 	}
 }
 
-type ChallengeStore struct {
-	DB *gorm.DB
+func GetChallenges(db *gorm.DB) (chals []Challenge, err error) {
+	err = db.Find(&chals).Error
+	return
 }
 
-func (repo *ChallengeStore) All() ([]ctf.Challenge, error) {
-	var chals []Challenge
-	if err := repo.DB.Find(&chals).Error; err != nil {
-		return nil, err
-	}
-
-	result := make([]ctf.Challenge, len(chals))
-	for i, _ := range chals {
-		result[i] = &chals[i]
-	}
-
-	return result, nil
-}
-
-func (repo *ChallengeStore) Get(id int) (ctf.Challenge, error) {
+func GetChallenge(db *gorm.DB, id int) (*Challenge, error) {
 	var chal Challenge
-	if err := repo.DB.First(&chal, id).Error; err != nil {
+	err := db.First(&chal, id).Error
+	if err != nil {
 		return nil, err
 	}
-	return &chal, nil
-}
-
-func (repo *ChallengeStore) Save(c ctf.Challenge) error {
-	chal, ok := c.(*Challenge)
-	if !ok {
-		return ctf.ErrModelMismatched
-	}
-	return repo.DB.Create(&chal).Error
+	return &chal, err
 }

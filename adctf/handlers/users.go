@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/activedefense/submarine/adctf/models"
-	"github.com/activedefense/submarine/ctf"
 	"github.com/activedefense/submarine/rules"
 	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/jinzhu/gorm"
@@ -40,15 +39,15 @@ func Signup(c echo.Context) error {
 		Role:     "normal",
 	}
 
-	store, _ := c.Get("jeopardy").(rules.JeopardyRule).GetTeamStore().(*models.TeamStore)
-	if _, err := store.GetTeamByName(team.GetName()); err != gorm.ErrRecordNotFound {
+	db := c.Get("jeopardy").(rules.JeopardyRule).GetDB()
+	if _, err := models.GetTeamByName(db, team.GetName()); err != gorm.ErrRecordNotFound {
 		if err == nil {
 			return echo.NewHTTPError(http.StatusConflict, "duplicate")
 		}
 		return err
 	}
 
-	if err := store.SaveTeam(team); err != nil {
+	if err := team.Create(db); err != nil {
 		return err
 	}
 
@@ -65,8 +64,8 @@ func Signin(c echo.Context) error {
 		return err
 	}
 
-	store, _ := c.Get("jeopardy").(rules.JeopardyRule).GetTeamStore().(*models.TeamStore)
-	team, err := store.GetTeamByName(form.Username)
+	db := c.Get("jeopardy").(rules.JeopardyRule).GetDB()
+	team, err := models.GetTeamByName(db, form.Username)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return echo.ErrNotFound
@@ -74,15 +73,15 @@ func Signin(c echo.Context) error {
 		return err
 	}
 
-	hash := []byte(team.(ctf.User).GetPassword())
+	hash := []byte(team.GetPassword())
 	if err := bcrypt.CompareHashAndPassword(hash, []byte(form.Password)); err != nil {
 		return echo.ErrUnauthorized
 	}
 
 	token := jwt.New(jwt.SigningMethodHS256)
 	claims := token.Claims.(jwt.MapClaims)
-	claims["user"] = team.(ctf.User).GetID()
-	claims["role"] = team.(*models.Team).Role
+	claims["user"] = team.GetID()
+	claims["role"] = team.Role
 
 	key := c.Get("secret").([]byte)
 
@@ -103,8 +102,8 @@ func Me(c echo.Context) error {
 		return echo.ErrNotFound
 	}
 
-	store := c.Get("jeopardy").(rules.JeopardyRule).GetTeamStore()
-	team, err := store.GetTeam(int(id))
+	db := c.Get("jeopardy").(rules.JeopardyRule).GetDB()
+	team, err := models.GetTeam(db, int(id))
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return echo.ErrNotFound

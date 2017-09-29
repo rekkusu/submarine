@@ -11,8 +11,8 @@ type FixedJeopardy struct {
 }
 
 func (scoring FixedJeopardy) GetScores() Scores {
-	submissions, _ := scoring.Jeopardy.GetSubmissionStore().All()
-	teams, _ := scoring.Jeopardy.GetTeamStore().AllTeams()
+	submissions, _ := scoring.Jeopardy.GetSubmissions()
+	teams, _ := scoring.Jeopardy.GetTeams()
 	teams_index := make(map[int]int)
 	var scores Scores
 

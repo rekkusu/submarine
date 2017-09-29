@@ -57,49 +57,17 @@ func (s Submission) GetSubmittedAt() time.Time {
 	return s.CreatedAt
 }
 
-type SubmissionStore struct {
-	DB *gorm.DB
-}
+func (s *Submission) Create(db *gorm.DB) error {
+	tx := db.Begin()
 
-func (store *SubmissionStore) All() ([]ctf.Submission, error) {
-	var submissions []Submission
-	if err := store.DB.Preload("Team").Preload("Challenge").Find(&submissions).Error; err != nil {
-		return nil, err
-	}
-
-	result := make([]ctf.Submission, len(submissions))
-	for i, _ := range submissions {
-		result[i] = &submissions[i]
-	}
-
-	return result, nil
-}
-
-func (store *SubmissionStore) Get(id int) (ctf.Submission, error) {
-	var sub Submission
-	if err := store.DB.Preload("Team").Preload("Challenge").First(&sub, id).Error; err != nil {
-		return nil, err
-	}
-	return &sub, nil
-}
-
-func (store *SubmissionStore) Save(s ctf.Submission) error {
-	sub, ok := s.(*Submission)
-	if !ok {
-		return ctf.ErrModelMismatched
-	}
-
-	tx := store.DB.Begin()
-
-	// check if the chal is already solved
-	solved := !tx.Where("team_id = ? AND challenge_id = ? AND correct = 1", sub.Team.GetID(), sub.Challenge.GetID()).Find(&Submission{}).RecordNotFound()
+	solved := !tx.Where("team_id = ? AND challenge_id = ? AND correct = 1", s.Team.ID, s.Challenge.ID).Find(&Submission{}).RecordNotFound()
 
 	if solved {
-		tx.Commit()
+		tx.Rollback()
 		return ErrChallengeHasAlreadySolved
 	}
 
-	if err := tx.Create(&sub).Error; err != nil {
+	if err := tx.Create(s).Error; err != nil {
 		tx.Rollback()
 		return err
 	}
@@ -107,4 +75,9 @@ func (store *SubmissionStore) Save(s ctf.Submission) error {
 	tx.Commit()
 
 	return nil
+}
+
+func GetSubmissions(db *gorm.DB) (submissions []Submission, err error) {
+	err = db.Preload("Team").Preload("Challenge").Find(&submissions).Error
+	return
 }

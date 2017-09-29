@@ -32,45 +32,27 @@ func (u Team) GetTeam() ctf.Team {
 	return u
 }
 
-type TeamStore struct {
-	DB *gorm.DB
+func (t *Team) Create(db *gorm.DB) error {
+	return db.Create(t).Error
 }
 
-func (store *TeamStore) AllTeams() ([]ctf.Team, error) {
-	var teams []Team
-	if err := store.DB.Find(&teams).Error; err != nil {
-		return nil, err
-	}
-
-	result := make([]ctf.Team, len(teams))
-	for i, _ := range teams {
-		result[i] = &teams[i]
-	}
-
-	return result, nil
+func GetTeams(db *gorm.DB) (teams []Team, err error) {
+	err = db.Find(&teams).Error
+	return
 }
 
-func (store *TeamStore) GetTeam(id int) (ctf.Team, error) {
+func GetTeam(db *gorm.DB, id int) (*Team, error) {
 	var t Team
-	if err := store.DB.First(&t, id).Error; err != nil {
+	if err := db.First(&t, id).Error; err != nil {
 		return nil, err
 	}
 	return &t, nil
 }
 
-func (store *TeamStore) GetTeamByName(name string) (ctf.Team, error) {
+func GetTeamByName(db *gorm.DB, name string) (*Team, error) {
 	var t Team
-	if err := store.DB.First(&t, "username=?", name).Error; err != nil {
+	if err := db.First(&t, "username=?", name).Error; err != nil {
 		return nil, err
 	}
 	return &t, nil
-}
-
-func (store *TeamStore) SaveTeam(t ctf.Team) error {
-	team, ok := t.(*Team)
-	if !ok {
-		return ctf.ErrModelMismatched
-	}
-
-	return store.DB.Create(team).Error
 }

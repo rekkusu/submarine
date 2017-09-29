@@ -12,7 +12,7 @@ import (
 
 func GetTeams(c echo.Context) error {
 	j, _ := c.Get("jeopardy").(rules.JeopardyRule)
-	teams, err := j.GetTeamStore().AllTeams()
+	teams, err := j.GetTeams()
 	if err != nil {
 		return err
 	}
@@ -27,7 +27,7 @@ func GetTeamByID(c echo.Context) error {
 		return echo.ErrNotFound
 	}
 
-	team, err := j.GetTeamStore().GetTeam(id)
+	team, err := j.GetTeam(id)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return echo.ErrNotFound
@@ -46,8 +46,8 @@ func CreateTeam(c echo.Context) error {
 
 	team.ID = 0
 
-	j, _ := c.Get("jeopardy").(rules.JeopardyRule)
-	if err := j.GetTeamStore().SaveTeam(team); err != nil {
+	db := c.Get("jeopardy").(rules.JeopardyRule).GetDB()
+	if err := team.Create(db); err != nil {
 		return err
 	}
 

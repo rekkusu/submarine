@@ -32,10 +32,7 @@ func New(config ADCTFConfig) *echo.Echo {
 	enforcer := initEnforcer(config)
 
 	jeopardy := &Jeopardy{
-		DB:         db,
-		Challenge:  &models.ChallengeStore{db},
-		Submission: &models.SubmissionStore{db},
-		Team:       &models.TeamStore{db},
+		DB: db,
 	}
 
 	e := echo.New()
@@ -122,26 +119,39 @@ func (cv *CustomValidator) Validate(i interface{}) error {
 }
 
 type Jeopardy struct {
-	DB         *gorm.DB
-	Challenge  ctf.ChallengeStore
-	Team       ctf.TeamStore
-	Submission ctf.SubmissionStore
+	DB *gorm.DB
 }
 
 func (j Jeopardy) GetDB() *gorm.DB {
 	return j.DB
 }
 
-func (j Jeopardy) GetChallengeStore() ctf.ChallengeStore {
-	return j.Challenge
+func (j Jeopardy) GetSubmissions() ([]ctf.Submission, error) {
+	sub, err := models.GetSubmissions(j.DB)
+	if err != nil {
+		return nil, err
+	}
+	ret := make([]ctf.Submission, len(sub))
+	for i, _ := range sub {
+		ret[i] = &sub[i]
+	}
+	return ret, nil
 }
 
-func (j Jeopardy) GetTeamStore() ctf.TeamStore {
-	return j.Team
+func (j Jeopardy) GetTeams() ([]ctf.Team, error) {
+	teams, err := models.GetTeams(j.DB)
+	if err != nil {
+		return nil, err
+	}
+	ret := make([]ctf.Team, len(teams))
+	for i, _ := range teams {
+		ret[i] = &teams[i]
+	}
+	return ret, nil
 }
 
-func (j Jeopardy) GetSubmissionStore() ctf.SubmissionStore {
-	return j.Submission
+func (j Jeopardy) GetTeam(id int) (ctf.Team, error) {
+	return models.GetTeam(j.DB, id)
 }
 
 func initEnforcer(config ADCTFConfig) *casbin.Enforcer {
