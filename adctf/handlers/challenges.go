@@ -39,7 +39,7 @@ func GetChallengeByID(c echo.Context) error {
 	return c.JSON(http.StatusOK, chal)
 }
 
-func NewChallenge(c echo.Context) error {
+func CreateChallenge(c echo.Context) error {
 	var form struct {
 		CategoryID  int    `json:"category_id"`
 		Title       string `json:"title"`
@@ -66,6 +66,62 @@ func NewChallenge(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusCreated, chal)
+}
+
+func UpdateChallenge(c echo.Context) error {
+	var form struct {
+		CategoryID  int    `json:"category_id"`
+		Title       string `json:"title"`
+		Point       int    `json:"point"`
+		Description string `json:"description"`
+		Flag        string `json:"flag"`
+	}
+
+	if err := c.Bind(&form); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "bad request")
+	}
+
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid ID")
+	}
+
+	chal := &models.Challenge{
+		ID:          id,
+		CategoryID:  form.CategoryID,
+		Title:       form.Title,
+		Point:       form.Point,
+		Description: form.Description,
+		Flag:        form.Flag,
+	}
+
+	db := c.Get("jeopardy").(rules.JeopardyRule).GetDB()
+	if err := chal.Save(db); err != nil {
+		return err
+	}
+
+	return c.NoContent(http.StatusNoContent)
+}
+
+func DeleteChallenge(c echo.Context) error {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid ID")
+	}
+
+	db := c.Get("jeopardy").(rules.JeopardyRule).GetDB()
+	chal, err := models.GetChallenge(db, id)
+	if err == gorm.ErrRecordNotFound {
+		return echo.NewHTTPError(http.StatusNotFound, "Not found")
+	} else if err != nil {
+		return err
+	}
+
+	if err := chal.Delete(db); err != nil {
+		return err
+	}
+
+	return c.NoContent(http.StatusNoContent)
 }
 
 func Submit(c echo.Context) error {
@@ -135,6 +191,13 @@ func UpdateCategory(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Bad Request")
 	}
 
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Bad Request")
+	}
+
+	category.ID = id
+
 	if err := c.Validate(category); err != nil {
 		return err
 	}
@@ -147,6 +210,23 @@ func UpdateCategory(c echo.Context) error {
 	return c.JSON(http.StatusCreated, category)
 }
 
+func DeleteCategory(c echo.Context) error {
+	id, err := strconv.Atoi(c.Param("id"))
+	db := c.Get("jeopardy").(rules.JeopardyRule).GetDB()
+	category, err := models.GetCategory(db, id)
+	if err == gorm.ErrRecordNotFound {
+		return echo.NewHTTPError(http.StatusNotFound, "Not found")
+	} else if err != nil {
+		return err
+	}
+
+	if err := category.Delete(db); err != nil {
+		return err
+	}
+
+	return c.NoContent(http.StatusNoContent)
+}
+
 func GetCategories(c echo.Context) error {
 	db := c.Get("jeopardy").(rules.JeopardyRule).GetDB()
 	cates, err := models.GetCategories(db)
@@ -154,5 +234,10 @@ func GetCategories(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, cates)
+	result := make(map[int]string)
+	for _, item := range cates {
+		result[item.ID] = item.Name
+	}
+
+	return c.JSON(http.StatusOK, result)
 }

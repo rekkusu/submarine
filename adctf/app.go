@@ -82,8 +82,10 @@ func New(config ADCTFConfig) *echo.Echo {
 	{
 		chals := e.Group("/api/v1/challenges")
 		chals.GET("", handlers.GetChallenges)
-		chals.POST("", handlers.NewChallenge)
+		chals.POST("", handlers.CreateChallenge)
 		chals.GET("/:id", handlers.GetChallengeByID)
+		chals.PUT("/:id", handlers.UpdateChallenge)
+		chals.DELETE("/:id", handlers.DeleteChallenge)
 		chals.POST("/:id/submit", handlers.Submit)
 	}
 
@@ -92,6 +94,7 @@ func New(config ADCTFConfig) *echo.Echo {
 		cate.GET("", handlers.GetCategories)
 		cate.POST("", handlers.CreateCategory)
 		cate.PUT("/:id", handlers.UpdateCategory)
+		cate.DELETE("/:id", handlers.DeleteCategory)
 	}
 
 	{
@@ -101,7 +104,6 @@ func New(config ADCTFConfig) *echo.Echo {
 	}
 
 	e.GET("/api/v1/scoreboard", handlers.GetScoreboard)
-
 	{
 		me := e.Group("/api/v1/me")
 		me.GET("", handlers.Me)

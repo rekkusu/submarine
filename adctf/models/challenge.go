@@ -42,6 +42,10 @@ func (c *Challenge) Save(db *gorm.DB) error {
 	return db.Save(c).Error
 }
 
+func (c *Challenge) Delete(db *gorm.DB) error {
+	return db.Delete(c).Error
+}
+
 func (c Challenge) Submit(team ctf.Team, answer string) *Submission {
 	score := 0
 	correct := false

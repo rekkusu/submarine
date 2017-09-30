@@ -16,12 +16,30 @@ func (c *Category) Save(db *gorm.DB) error {
 	return db.Save(c).Error
 }
 
+func (c *Category) Delete(db *gorm.DB) error {
+	tx := db.Begin()
+
+	for _, item := range c.Challenges {
+		err := item.Delete(db)
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+
+	if err := db.Delete(c).Error; err != nil {
+		return tx.Rollback().Error
+	}
+
+	return tx.Commit().Error
+}
+
 func GetCategories(db *gorm.DB) (categories []Category, err error) {
 	err = db.Preload("Challenges").Find(&categories).Error
 	return
 }
 
-func GetCategoryByID(db *gorm.DB, id int) (category *Category, err error) {
+func GetCategory(db *gorm.DB, id int) (category *Category, err error) {
 	err = db.Preload("Challenges").First(category, id).Error
 	return
 }
