@@ -7,6 +7,7 @@ p, noauth, /api/v1/scoreboard, GET
 
 p, normal, /api/v1/me, GET
 p, normal, /api/v1/challenges, GET
+p, normal, /api/v1/challenges/solves, GET
 p, normal, /api/v1/challenges/:id, GET
 p, normal, /api/v1/challenges/:id/submit, POST
 p, normal, /api/v1/categories, GET

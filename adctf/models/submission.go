@@ -81,3 +81,14 @@ func GetSubmissions(db *gorm.DB) (submissions []Submission, err error) {
 	err = db.Preload("Team").Preload("Challenge").Find(&submissions).Error
 	return
 }
+
+type Solves struct {
+	ChallengeID int `json:"challenge_id"`
+	Solves      int `json:"solves"`
+}
+
+func GetSolves(db *gorm.DB) ([]Solves, error) {
+	var solves []Solves
+	err := db.Select("challenge_id, COUNT(DISTINCT team_id) as solves").Where("correct=?", true).Group("challenge_id").Table("submissions").Find(&solves).Error
+	return solves, err
+}

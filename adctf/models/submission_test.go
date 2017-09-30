@@ -74,3 +74,26 @@ func TestSubmissionCreate(t *testing.T) {
 		}
 	}
 }
+
+func TestGetSolves(t *testing.T) {
+	db, chals, _, teams := initDB()
+	subs := []Submission{
+		Submission{Challenge: chals[0], Answer: "sample", Score: 100, Correct: true, Team: teams[0]},
+		Submission{Challenge: chals[1], Answer: "sample", Score: 100, Correct: true, Team: teams[0]},
+		Submission{Challenge: chals[1], Answer: "sample", Score: 100, Correct: true, Team: teams[1]},
+		Submission{Challenge: chals[1], Answer: "sample", Score: 100, Correct: true, Team: teams[1]},
+	}
+
+	expect := []Solves{
+		Solves{1, 1},
+		Solves{2, 2},
+	}
+
+	for _, item := range subs {
+		db.Create(&item)
+	}
+
+	solves, err := GetSolves(db)
+	assert.NoError(t, err)
+	assert.Equal(t, expect, solves)
+}

@@ -83,6 +83,7 @@ func New(config ADCTFConfig) *echo.Echo {
 		chals := e.Group("/api/v1/challenges")
 		chals.GET("", handlers.GetChallenges)
 		chals.POST("", handlers.CreateChallenge)
+		chals.GET("/solves", handlers.GetSolves)
 		chals.GET("/:id", handlers.GetChallengeByID)
 		chals.PUT("/:id", handlers.UpdateChallenge)
 		chals.DELETE("/:id", handlers.DeleteChallenge)
