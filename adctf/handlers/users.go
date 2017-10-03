@@ -25,7 +25,7 @@ func Signup(c echo.Context) error {
 
 	validate := validator.New()
 	if err := validate.Struct(form); err != nil {
-		return err
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
 	passhash, err := bcrypt.GenerateFromPassword([]byte(form.Password), bcrypt.DefaultCost)
