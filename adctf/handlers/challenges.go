@@ -138,7 +138,8 @@ func Submit(c echo.Context) error {
 		return echo.ErrNotFound
 	}
 
-	db := c.Get("jeopardy").(rules.JeopardyRule).GetDB()
+	jeopardy := c.Get("jeopardy").(rules.JeopardyRule)
+	db := jeopardy.GetDB()
 	claims := c.Get("jwt").(*jwt.Token).Claims.(jwt.MapClaims)
 	team_id := int(claims["user"].(float64))
 	team, err := models.GetTeam(db, team_id)
@@ -153,9 +154,8 @@ func Submit(c echo.Context) error {
 		return err
 	}
 
-	sub := chal.Submit(team, form.Answer)
-
-	if err := sub.Create(db); err != nil {
+	sub, err := chal.Submit(db, team, form.Answer)
+	if err != nil {
 		if err == models.ErrChallengeHasAlreadySolved {
 			return echo.NewHTTPError(http.StatusConflict, err.Error())
 		}

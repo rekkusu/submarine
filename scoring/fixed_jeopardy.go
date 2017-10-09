@@ -27,7 +27,7 @@ func (scoring FixedJeopardy) GetScores() Scores {
 		}
 
 		score := scores[teams_index[item.GetTeam().GetID()]].(*score)
-		score.Score += item.GetScore()
+		score.Score += item.GetChallenge().GetPoint()
 		if score.LastSubmission.Before(item.GetSubmittedAt()) {
 			score.LastSubmission = item.GetSubmittedAt()
 		}
