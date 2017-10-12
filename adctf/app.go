@@ -83,7 +83,6 @@ func New(config ADCTFConfig) *echo.Echo {
 		chals := e.Group("/api/v1/challenges")
 		chals.GET("", handlers.GetChallenges)
 		chals.POST("", handlers.CreateChallenge)
-		chals.GET("/solves", handlers.GetSolves)
 		chals.GET("/:id", handlers.GetChallengeByID)
 		chals.PUT("/:id", handlers.UpdateChallenge)
 		chals.DELETE("/:id", handlers.DeleteChallenge)
@@ -127,6 +126,18 @@ type Jeopardy struct {
 
 func (j Jeopardy) GetDB() *gorm.DB {
 	return j.DB
+}
+
+func (j Jeopardy) GetChallenges() ([]ctf.Challenge, error) {
+	chals, err := models.GetChallengesWithSolves(j.DB)
+	if err != nil {
+		return nil, err
+	}
+	ret := make([]ctf.Challenge, len(chals))
+	for i, _ := range chals {
+		ret[i] = &chals[i]
+	}
+	return ret, nil
 }
 
 func (j Jeopardy) GetSubmissions() ([]ctf.Submission, error) {

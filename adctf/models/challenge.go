@@ -14,6 +14,11 @@ type Challenge struct {
 	Flag        string `json:"-"`
 }
 
+type ChallengeWithSolves struct {
+	Challenge
+	Solves int `json:"solves"`
+}
+
 func (c Challenge) GetID() int {
 	return c.ID
 }
@@ -24,6 +29,14 @@ func (c Challenge) GetTitle() string {
 
 func (c Challenge) GetPoint() int {
 	return c.Point
+}
+
+func (c *Challenge) GetSolves() int {
+	return 0
+}
+
+func (c *ChallengeWithSolves) GetSolves() int {
+	return c.Solves
 }
 
 func (c Challenge) GetDescription() string {
@@ -77,6 +90,11 @@ func (c Challenge) Submit(db *gorm.DB, team ctf.Team, answer string) (*Submissio
 
 func GetChallenges(db *gorm.DB) (chals []Challenge, err error) {
 	err = db.Find(&chals).Error
+	return
+}
+
+func GetChallengesWithSolves(db *gorm.DB) (chals []ChallengeWithSolves, err error) {
+	err = db.Table("challenges").Select("challenges.*, solves").Joins("INNER JOIN (SELECT challenge_id, COUNT(DISTINCT team_id) as solves FROM submissions WHERE correct=1 GROUP BY challenge_id) ON challenge_id = challenges.id").Scan(&chals).Error
 	return
 }
 

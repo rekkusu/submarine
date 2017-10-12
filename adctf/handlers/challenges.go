@@ -12,8 +12,9 @@ import (
 )
 
 func GetChallenges(c echo.Context) error {
-	db := c.Get("jeopardy").(rules.JeopardyRule).GetDB()
-	chals, err := models.GetChallenges(db)
+	jeopardy := c.Get("jeopardy").(rules.JeopardyRule)
+	db := jeopardy.GetDB()
+	chals, err := models.GetChallengesWithSolves(db)
 	if err != nil {
 		return err
 	}
