@@ -1,12 +1,14 @@
 package adctf
 
 import (
+	"math"
 	"reflect"
 	"strings"
 
 	"github.com/activedefense/submarine/adctf/handlers"
 	"github.com/activedefense/submarine/adctf/models"
 	"github.com/activedefense/submarine/ctf"
+	"github.com/activedefense/submarine/scoring"
 	"github.com/casbin/casbin"
 	"github.com/jinzhu/gorm"
 	"github.com/labstack/echo"
@@ -83,7 +85,6 @@ func New(config ADCTFConfig) *echo.Echo {
 		chals := e.Group("/api/v1/challenges")
 		chals.GET("", handlers.GetChallenges)
 		chals.POST("", handlers.CreateChallenge)
-		chals.GET("/solves", handlers.GetSolves)
 		chals.GET("/:id", handlers.GetChallengeByID)
 		chals.PUT("/:id", handlers.UpdateChallenge)
 		chals.DELETE("/:id", handlers.DeleteChallenge)
@@ -129,6 +130,18 @@ func (j Jeopardy) GetDB() *gorm.DB {
 	return j.DB
 }
 
+func (j Jeopardy) GetChallenges() ([]ctf.Challenge, error) {
+	chals, err := models.GetChallengesWithSolves(j.DB)
+	if err != nil {
+		return nil, err
+	}
+	ret := make([]ctf.Challenge, len(chals))
+	for i, _ := range chals {
+		ret[i] = &chals[i]
+	}
+	return ret, nil
+}
+
 func (j Jeopardy) GetSubmissions() ([]ctf.Submission, error) {
 	sub, err := models.GetSubmissions(j.DB)
 	if err != nil {
@@ -155,6 +168,18 @@ func (j Jeopardy) GetTeams() ([]ctf.Team, error) {
 
 func (j Jeopardy) GetTeam(id int) (ctf.Team, error) {
 	return models.GetTeam(j.DB, id)
+}
+
+func (j Jeopardy) GetScoring() ctf.Scoring {
+	return &scoring.DynamicJeopardy{
+		Jeopardy: j,
+		Expression: func(base, solves int) int {
+			if solves == 0 {
+				return base
+			}
+			return int(math.Max(float64(base/100), float64(base)/math.Cbrt(float64(solves))))
+		},
+	}
 }
 
 func initEnforcer(config ADCTFConfig) *casbin.Enforcer {

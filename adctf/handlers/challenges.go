@@ -12,10 +12,15 @@ import (
 )
 
 func GetChallenges(c echo.Context) error {
-	db := c.Get("jeopardy").(rules.JeopardyRule).GetDB()
-	chals, err := models.GetChallenges(db)
+	jeopardy := c.Get("jeopardy").(rules.JeopardyRule)
+	db := jeopardy.GetDB()
+	chals, err := models.GetChallengesWithSolves(db)
 	if err != nil {
 		return err
+	}
+
+	for i, c := range chals {
+		chals[i].Point = jeopardy.GetScoring().CalcScore(&c)
 	}
 
 	return c.JSON(http.StatusOK, chals)
@@ -138,7 +143,8 @@ func Submit(c echo.Context) error {
 		return echo.ErrNotFound
 	}
 
-	db := c.Get("jeopardy").(rules.JeopardyRule).GetDB()
+	jeopardy := c.Get("jeopardy").(rules.JeopardyRule)
+	db := jeopardy.GetDB()
 	claims := c.Get("jwt").(*jwt.Token).Claims.(jwt.MapClaims)
 	team_id := int(claims["user"].(float64))
 	team, err := models.GetTeam(db, team_id)
@@ -153,14 +159,15 @@ func Submit(c echo.Context) error {
 		return err
 	}
 
-	sub := chal.Submit(team, form.Answer)
-
-	if err := sub.Create(db); err != nil {
+	sub, err := chal.Submit(db, team, form.Answer)
+	if err != nil {
 		if err == models.ErrChallengeHasAlreadySolved {
 			return echo.NewHTTPError(http.StatusConflict, err.Error())
 		}
 		return err
 	}
+
+	jeopardy.GetScoring().Recalculate()
 
 	return c.JSON(http.StatusAccepted, sub)
 }

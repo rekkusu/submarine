@@ -5,7 +5,6 @@ import (
 	"sort"
 
 	"github.com/activedefense/submarine/rules"
-	"github.com/activedefense/submarine/scoring"
 	"github.com/labstack/echo"
 )
 
@@ -17,9 +16,7 @@ func GetScoreboard(c echo.Context) error {
 	}
 
 	j, _ := c.Get("jeopardy").(rules.JeopardyRule)
-
-	scoring := scoring.FixedJeopardy{j}
-	scores := scoring.GetScores()
+	scores := j.GetScoring().GetScores()
 
 	sort.Stable(scores)
 

@@ -8,7 +8,6 @@ type Submission interface {
 	GetUser() User
 	GetChallenge() Challenge
 	GetAnswer() string
-	GetScore() int
 	IsCorrect() bool
 	GetSubmittedAt() time.Time
 }

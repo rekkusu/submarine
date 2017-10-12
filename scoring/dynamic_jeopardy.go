@@ -7,18 +7,20 @@ import (
 	"github.com/activedefense/submarine/rules"
 )
 
-type FixedJeopardy struct {
-	Jeopardy rules.JeopardyRule
+type DynamicJeopardy struct {
+	Jeopardy   rules.JeopardyRule
+	Expression func(base int, weight int) int
 }
 
-func (scoring FixedJeopardy) CalcScore(chal ctf.Challenge) int {
-	return chal.GetPoint()
+func (scoring DynamicJeopardy) CalcScore(chal ctf.Challenge) int {
+	return scoring.Expression(chal.GetPoint(), chal.GetSolves())
 }
 
-func (scoring FixedJeopardy) Recalculate() {
+func (scoring DynamicJeopardy) Recalculate() {
 }
 
-func (scoring FixedJeopardy) GetScores() ctf.Scores {
+func (scoring DynamicJeopardy) GetScores() ctf.Scores {
+	chals, _ := scoring.Jeopardy.GetChallenges()
 	submissions, _ := scoring.Jeopardy.GetSubmissions()
 	teams, _ := scoring.Jeopardy.GetTeams()
 	teams_index := make(map[int]int)
@@ -35,7 +37,15 @@ func (scoring FixedJeopardy) GetScores() ctf.Scores {
 		}
 
 		score := scores[teams_index[item.GetTeam().GetID()]].(*score)
-		score.Score += item.GetChallenge().GetPoint()
+		var chal ctf.Challenge
+		for _, c := range chals {
+			if c.GetID() == item.GetChallenge().GetID() {
+				chal = c
+				break
+			}
+		}
+
+		score.Score += scoring.CalcScore(chal)
 		if score.LastSubmission.Before(item.GetSubmittedAt()) {
 			score.LastSubmission = item.GetSubmittedAt()
 		}

@@ -4,6 +4,7 @@ type Challenge interface {
 	GetID() int
 	GetTitle() string
 	GetPoint() int
+	GetSolves() int
 	GetDescription() string
 	GetFlag() string
 }

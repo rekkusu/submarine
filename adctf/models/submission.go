@@ -20,7 +20,6 @@ type Submission struct {
 	Challenge   *Challenge `json:"challenge,omitempty" gorm:"ForeignKey:ChallengeID"`
 	ChallengeID int        `json:"-"`
 	Answer      string     `json:"answer"`
-	Score       int        `json:"score"`
 	Correct     bool       `json:"is_correct"`
 	CreatedAt   time.Time  `json:"submitted_at"`
 }
@@ -43,10 +42,6 @@ func (s Submission) GetChallenge() ctf.Challenge {
 
 func (s Submission) GetAnswer() string {
 	return s.Answer
-}
-
-func (s Submission) GetScore() int {
-	return s.Score
 }
 
 func (s Submission) IsCorrect() bool {
