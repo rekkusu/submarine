@@ -19,6 +19,10 @@ func GetChallenges(c echo.Context) error {
 		return err
 	}
 
+	for i, c := range chals {
+		chals[i].Point = jeopardy.GetScoring().CalcScore(&c)
+	}
+
 	return c.JSON(http.StatusOK, chals)
 }
 
@@ -162,6 +166,8 @@ func Submit(c echo.Context) error {
 		}
 		return err
 	}
+
+	jeopardy.GetScoring().Recalculate()
 
 	return c.JSON(http.StatusAccepted, sub)
 }

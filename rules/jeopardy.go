@@ -11,4 +11,5 @@ type JeopardyRule interface {
 	GetSubmissions() ([]ctf.Submission, error)
 	GetTeams() ([]ctf.Team, error)
 	GetTeam(id int) (ctf.Team, error)
+	GetScoring() ctf.Scoring
 }

@@ -1,12 +1,14 @@
 package adctf
 
 import (
+	"math"
 	"reflect"
 	"strings"
 
 	"github.com/activedefense/submarine/adctf/handlers"
 	"github.com/activedefense/submarine/adctf/models"
 	"github.com/activedefense/submarine/ctf"
+	"github.com/activedefense/submarine/scoring"
 	"github.com/casbin/casbin"
 	"github.com/jinzhu/gorm"
 	"github.com/labstack/echo"
@@ -166,6 +168,18 @@ func (j Jeopardy) GetTeams() ([]ctf.Team, error) {
 
 func (j Jeopardy) GetTeam(id int) (ctf.Team, error) {
 	return models.GetTeam(j.DB, id)
+}
+
+func (j Jeopardy) GetScoring() ctf.Scoring {
+	return &scoring.DynamicJeopardy{
+		Jeopardy: j,
+		Expression: func(base, solves int) int {
+			if solves == 0 {
+				return base
+			}
+			return int(math.Max(float64(base/100), float64(base)/math.Cbrt(float64(solves))))
+		},
+	}
 }
 
 func initEnforcer(config ADCTFConfig) *casbin.Enforcer {
