@@ -6,12 +6,12 @@ import (
 )
 
 type Challenge struct {
-	ID          int    `gorm:"primary_key;AUTO_INCREMENT" json:"id"`
-	CategoryID  int    `json:"category_id"`
-	Title       string `json:"title"`
-	Point       int    `json:"point"`
-	Description string `json:"description"`
-	Flag        string `json:"-"`
+	ID          int     `gorm:"primary_key;AUTO_INCREMENT" json:"id"`
+	CategoryID  int     `json:"category_id"`
+	Title       string  `json:"title"`
+	Point       int     `json:"point"`
+	Description string  `json:"description"`
+	Flag        *string `json:"flag,omitempty"`
 }
 
 type ChallengeWithSolves struct {
@@ -44,7 +44,10 @@ func (c Challenge) GetDescription() string {
 }
 
 func (c Challenge) GetFlag() string {
-	return c.Flag
+	if c.Flag == nil {
+		return ""
+	}
+	return *c.Flag
 }
 
 func (c *Challenge) Create(db *gorm.DB) error {

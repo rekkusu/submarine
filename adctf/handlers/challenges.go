@@ -20,6 +20,7 @@ func GetChallenges(c echo.Context) error {
 	}
 
 	for i, c := range chals {
+		chals[i].Flag = nil
 		chals[i].Point = jeopardy.GetScoring().CalcScore(&c)
 	}
 
@@ -62,7 +63,7 @@ func CreateChallenge(c echo.Context) error {
 		Title:       form.Title,
 		Point:       form.Point,
 		Description: form.Description,
-		Flag:        form.Flag,
+		Flag:        &form.Flag,
 	}
 
 	db := c.Get("jeopardy").(rules.JeopardyRule).GetDB()
@@ -97,7 +98,7 @@ func UpdateChallenge(c echo.Context) error {
 		Title:       form.Title,
 		Point:       form.Point,
 		Description: form.Description,
-		Flag:        form.Flag,
+		Flag:        &form.Flag,
 	}
 
 	db := c.Get("jeopardy").(rules.JeopardyRule).GetDB()
