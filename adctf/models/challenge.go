@@ -97,7 +97,7 @@ func GetChallenges(db *gorm.DB) (chals []Challenge, err error) {
 }
 
 func GetChallengesWithSolves(db *gorm.DB) (chals []ChallengeWithSolves, err error) {
-	err = db.Table("challenges").Select("challenges.*, solves").Joins("INNER JOIN (SELECT challenge_id, COUNT(DISTINCT team_id) as solves FROM submissions WHERE correct=1 GROUP BY challenge_id) ON challenge_id = challenges.id").Scan(&chals).Error
+	err = db.Table("challenges").Select("challenges.*, solves").Joins("LEFT JOIN (SELECT challenge_id, COUNT(DISTINCT team_id) as solves FROM submissions WHERE correct=1 GROUP BY challenge_id) ON challenge_id = challenges.id").Scan(&chals).Error
 	return
 }
 
