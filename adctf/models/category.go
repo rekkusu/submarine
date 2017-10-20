@@ -5,7 +5,7 @@ import "github.com/jinzhu/gorm"
 type Category struct {
 	ID         int         `gorm:"primary_key;AUTO_INCREMENT" json:"id"`
 	Name       string      `json:"name" validate:"required"`
-	Challenges []Challenge `gorm:"ForeignKey:CategoryID" json:"challenges" json:",omitempty"`
+	Challenges []Challenge `gorm:"ForeignKey:CategoryID" json:"challenges,omitempty"`
 }
 
 func (c *Category) Create(db *gorm.DB) error {
@@ -17,21 +17,11 @@ func (c *Category) Save(db *gorm.DB) error {
 }
 
 func (c *Category) Delete(db *gorm.DB) error {
-	tx := db.Begin()
-
-	for _, item := range c.Challenges {
-		err := item.Delete(db)
-		if err != nil {
-			tx.Rollback()
-			return err
-		}
-	}
-
 	if err := db.Delete(c).Error; err != nil {
-		return tx.Rollback().Error
+		return err
 	}
 
-	return tx.Commit().Error
+	return nil
 }
 
 func GetCategories(db *gorm.DB) (categories []Category, err error) {
