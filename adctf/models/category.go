@@ -39,7 +39,12 @@ func GetCategories(db *gorm.DB) (categories []Category, err error) {
 	return
 }
 
-func GetCategory(db *gorm.DB, id int) (category *Category, err error) {
-	err = db.Preload("Challenges").First(category, id).Error
-	return
+func GetCategory(db *gorm.DB, id int) (*Category, error) {
+	var category Category
+	err := db.Preload("Challenges").First(&category, id).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return &category, nil
 }
