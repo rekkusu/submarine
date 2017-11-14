@@ -8,8 +8,10 @@ import (
 	"github.com/activedefense/submarine/adctf/handlers"
 	"github.com/activedefense/submarine/adctf/models"
 	"github.com/activedefense/submarine/ctf"
+	"github.com/activedefense/submarine/rules"
 	"github.com/activedefense/submarine/scoring"
 	"github.com/casbin/casbin"
+	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/jinzhu/gorm"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
@@ -24,12 +26,13 @@ type ADCTFConfig struct {
 }
 
 const (
-	JWTKey = "jwt"
+	JWTKey        = "jwt"
+	NotAuthorized = "noauth"
 )
 
 func New(config ADCTFConfig) *echo.Echo {
 	db, _ := gorm.Open(config.DriverName, config.DataSourceName)
-	db.AutoMigrate(&models.Challenge{}, &models.Submission{}, &models.Team{}, &models.Category{})
+	db.AutoMigrate(&models.Challenge{}, &models.Submission{}, &models.Team{}, &models.Category{}, &models.ContestInfo{})
 
 	enforcer := initEnforcer(config)
 
@@ -51,15 +54,17 @@ func New(config ADCTFConfig) *echo.Echo {
 			return false
 		},
 	}))
-	e.Use(CasbinMiddleware(enforcer))
 
 	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			c.Set("secret", config.JWTSecret)
 			c.Set("jeopardy", jeopardy)
+			c.Set("role", getRole(c))
 			return next(c)
 		}
 	})
+
+	e.Use(CasbinMiddleware(enforcer))
 
 	validate := validator.New()
 	validate.RegisterTagNameFunc(func(fld reflect.StructField) string {
@@ -105,13 +110,41 @@ func New(config ADCTFConfig) *echo.Echo {
 		users.POST("/signin", handlers.Signin)
 	}
 
-	e.GET("/api/v1/scoreboard", handlers.GetScoreboard)
 	{
 		me := e.Group("/api/v1/me")
 		me.GET("", handlers.Me)
 	}
 
+	e.GET("/api/v1/scoreboard", handlers.GetScoreboard)
+	e.GET("/api/v1/contest", handlers.GetContestInfo)
+	e.PUT("/api/v1/contest", handlers.PutContestInfo)
+
 	return e
+}
+
+func getRole(c echo.Context) string {
+	if c.Get(JWTKey) == nil {
+		return NotAuthorized
+	}
+
+	token := c.Get(JWTKey).(*jwt.Token)
+	if !token.Valid {
+		return NotAuthorized
+	}
+
+	user, ok := token.Claims.(jwt.MapClaims)["user"]
+	if !ok {
+		return NotAuthorized
+	}
+
+	jeopardy := c.Get("jeopardy").(rules.JeopardyRule)
+	db := jeopardy.GetDB()
+	team, err := models.GetTeam(db, (int)(user.(float64)))
+	if err != nil {
+		return NotAuthorized
+	}
+
+	return team.Role
 }
 
 type CustomValidator struct {

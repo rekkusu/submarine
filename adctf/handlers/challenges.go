@@ -14,6 +14,17 @@ import (
 func GetChallenges(c echo.Context) error {
 	jeopardy := c.Get("jeopardy").(rules.JeopardyRule)
 	db := jeopardy.GetDB()
+	info, err := models.GetContestInfo(db)
+	if err != nil {
+		return err
+	}
+
+	role := c.Get("role").(string)
+
+	if info.Status == models.ContestClosed && role != "admin" {
+		return echo.ErrForbidden
+	}
+
 	chals, err := models.GetChallengesWithSolves(db)
 	if err != nil {
 		return err
@@ -32,6 +43,17 @@ func GetChallengeByID(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		return echo.ErrNotFound
+	}
+
+	info, err := models.GetContestInfo(db)
+	if err != nil {
+		return err
+	}
+
+	role := c.Get("role").(string)
+
+	if info.Status == models.ContestClosed && role != "admin" {
+		return echo.ErrForbidden
 	}
 
 	chal, err := models.GetChallenge(db, id)
@@ -131,6 +153,14 @@ func DeleteChallenge(c echo.Context) error {
 }
 
 func Submit(c echo.Context) error {
+	jeopardy := c.Get("jeopardy").(rules.JeopardyRule)
+	db := jeopardy.GetDB()
+	info, err := models.GetContestInfo(db)
+
+	if info.Status != models.ContestOpen {
+		return echo.ErrForbidden
+	}
+
 	var form struct {
 		Answer string `json:"answer"`
 	}
@@ -144,8 +174,6 @@ func Submit(c echo.Context) error {
 		return echo.ErrNotFound
 	}
 
-	jeopardy := c.Get("jeopardy").(rules.JeopardyRule)
-	db := jeopardy.GetDB()
 	claims := c.Get("jwt").(*jwt.Token).Claims.(jwt.MapClaims)
 	team_id := int(claims["user"].(float64))
 	team, err := models.GetTeam(db, team_id)

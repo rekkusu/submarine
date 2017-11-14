@@ -2,7 +2,6 @@ package adctf
 
 import (
 	"github.com/casbin/casbin"
-	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 )
@@ -15,8 +14,6 @@ type CasbinConfig struct {
 var DefaultCasbinConfig = CasbinConfig{
 	Skipper: middleware.DefaultSkipper,
 }
-
-const NotAuthorized = "noauth"
 
 func CasbinMiddleware(enforcer *casbin.Enforcer) echo.MiddlewareFunc {
 	c := DefaultCasbinConfig
@@ -45,20 +42,7 @@ func CasbinMiddlewareWithConfig(config CasbinConfig) echo.MiddlewareFunc {
 }
 
 func (conf *CasbinConfig) GetRole(c echo.Context) string {
-	if c.Get(JWTKey) == nil {
-		return NotAuthorized
-	}
-
-	token := c.Get(JWTKey).(*jwt.Token)
-	if !token.Valid {
-		return NotAuthorized
-	}
-
-	username, ok := token.Claims.(jwt.MapClaims)["role"]
-	if !ok {
-		return NotAuthorized
-	}
-	return username.(string)
+	return c.Get("role").(string)
 }
 
 func (conf *CasbinConfig) CheckPermission(c echo.Context) bool {
