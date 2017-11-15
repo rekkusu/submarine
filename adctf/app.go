@@ -32,7 +32,7 @@ const (
 
 func New(config ADCTFConfig) *echo.Echo {
 	db, _ := gorm.Open(config.DriverName, config.DataSourceName)
-	db.AutoMigrate(&models.Challenge{}, &models.Submission{}, &models.Team{}, &models.Category{}, &models.ContestInfo{})
+	db.AutoMigrate(&models.Challenge{}, &models.Submission{}, &models.Team{}, &models.Category{}, &models.ContestInfo{}, &models.Announcement{})
 
 	enforcer := initEnforcer(config)
 
@@ -123,6 +123,10 @@ func New(config ADCTFConfig) *echo.Echo {
 	e.GET("/api/v1/scoreboard", handlers.GetScoreboard)
 	e.GET("/api/v1/contest", handlers.GetContestInfo)
 	e.PUT("/api/v1/contest", handlers.PutContestInfo)
+
+	e.GET("/api/v1/announcements", handlers.GetCurrentAnnouncements)
+	e.GET("/api/v1/announcements/all", handlers.GetAllAnnouncements)
+	e.POST("/api/v1/announcements", handlers.NewAnnouncement)
 
 	return e
 }

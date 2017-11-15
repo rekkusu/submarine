@@ -6,6 +6,8 @@ p, noauth, /api/v1/users/signin, POST
 p, noauth, /api/v1/scoreboard, GET
 p, noauth, /api/v1/contest, GET
 
+p, noauth, /api/v1/announcements, GET
+
 p, normal, /api/v1/me, GET
 p, normal, /api/v1/challenges, GET
 p, normal, /api/v1/challenges/solves, GET
@@ -18,6 +20,8 @@ p, admin, /api/v1/challenges/:id, *
 p, admin, /api/v1/categories, *
 p, admin, /api/v1/categories/:id, *
 p, admin, /api/v1/contest, *
+p, admin, /api/v1/announcements, *
+p, admin, /api/v1/announcements/all, GET
 
 g, normal, noauth
 g, admin, normal

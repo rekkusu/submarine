@@ -19,7 +19,7 @@ const (
 	contestInfoID = 1
 )
 
-type Announce struct {
+type Announcement struct {
 	ID       int       `json:"id"`
 	Message  string    `json:"message"`
 	PostedAt time.Time `json:"posted_at"`
@@ -61,4 +61,30 @@ func GetContestInfo(db *gorm.DB) (*ContestInfo, error) {
 func SetContestStatus(db *gorm.DB, info ContestInfo) error {
 	info.ID = contestInfoID
 	return db.Save(&info).Error
+}
+
+func (a *Announcement) Create(db *gorm.DB) error {
+	err := db.Create(a).Error
+	return err
+}
+
+func (a *Announcement) Save(db *gorm.DB) error {
+	err := db.Save(a).Error
+	return err
+}
+
+func GetAllAnnouncements(db *gorm.DB) ([]Announcement, error) {
+	var announcements []Announcement
+	if err := db.Order("posted_at").Find(&announcements).Error; err != nil {
+		return nil, err
+	}
+	return announcements, nil
+}
+
+func GetCurrentAnnouncements(db *gorm.DB) ([]Announcement, error) {
+	var announcements []Announcement
+	if err := db.Where("posted_at <= ?", time.Now()).Order("posted_at").Find(&announcements).Error; err != nil {
+		return nil, err
+	}
+	return announcements, nil
 }
