@@ -14,14 +14,9 @@ import (
 func GetChallenges(c echo.Context) error {
 	jeopardy := c.Get("jeopardy").(rules.JeopardyRule)
 	db := jeopardy.GetDB()
-	info, err := models.GetContestInfo(db)
-	if err != nil {
-		return err
-	}
+	team := c.Get("team").(*models.Team)
 
-	role := c.Get("role").(string)
-
-	if info.Status == models.ContestClosed && role != "admin" {
+	if models.IsContestClosed(db) && !models.IsAdmin(team) {
 		return echo.ErrForbidden
 	}
 
@@ -45,14 +40,8 @@ func GetChallengeByID(c echo.Context) error {
 		return echo.ErrNotFound
 	}
 
-	info, err := models.GetContestInfo(db)
-	if err != nil {
-		return err
-	}
-
-	role := c.Get("role").(string)
-
-	if info.Status == models.ContestClosed && role != "admin" {
+	team := c.Get("team").(*models.Team)
+	if models.IsContestClosed(db) && !models.IsAdmin(team) {
 		return echo.ErrForbidden
 	}
 
@@ -155,9 +144,8 @@ func DeleteChallenge(c echo.Context) error {
 func Submit(c echo.Context) error {
 	jeopardy := c.Get("jeopardy").(rules.JeopardyRule)
 	db := jeopardy.GetDB()
-	info, err := models.GetContestInfo(db)
 
-	if info.Status != models.ContestOpen {
+	if !models.IsContestOpen(db) {
 		return echo.ErrForbidden
 	}
 
