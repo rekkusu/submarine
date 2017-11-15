@@ -105,6 +105,11 @@ func New(config ADCTFConfig) *echo.Echo {
 	}
 
 	{
+		submissions := e.Group("/api/v1/submissions")
+		submissions.GET("/solved", handlers.GetSolvedChallenges)
+	}
+
+	{
 		users := e.Group("/api/v1/users")
 		users.POST("/signup", handlers.Signup)
 		users.POST("/signin", handlers.Signin)

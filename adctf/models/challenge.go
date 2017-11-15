@@ -68,7 +68,7 @@ func (c Challenge) Submit(db *gorm.DB, team ctf.Team, answer string) (*Submissio
 	s := &Submission{
 		Team:      team.(*Team),
 		Challenge: &c,
-		Answer:    answer,
+		Answer:    &answer,
 		Correct:   correct,
 	}
 

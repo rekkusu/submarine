@@ -19,7 +19,7 @@ type Submission struct {
 	TeamID      int        `json:"-"`
 	Challenge   *Challenge `json:"challenge,omitempty" gorm:"ForeignKey:ChallengeID"`
 	ChallengeID int        `json:"-"`
-	Answer      string     `json:"answer"`
+	Answer      *string    `json:"answer,omitempty"`
 	Correct     bool       `json:"is_correct"`
 	CreatedAt   time.Time  `json:"submitted_at"`
 }
@@ -41,7 +41,7 @@ func (s Submission) GetChallenge() ctf.Challenge {
 }
 
 func (s Submission) GetAnswer() string {
-	return s.Answer
+	return *s.Answer
 }
 
 func (s Submission) IsCorrect() bool {
@@ -86,4 +86,17 @@ func GetSolves(db *gorm.DB) ([]Solves, error) {
 	var solves []Solves
 	err := db.Select("challenge_id, COUNT(DISTINCT team_id) as solves").Where("correct=?", true).Group("challenge_id").Table("submissions").Find(&solves).Error
 	return solves, err
+}
+
+func GetSolvedChallenges(db *gorm.DB, id int) ([]Submission, error) {
+	var subs []Submission
+	err := db.Preload("Challenge").Where("correct = 1 AND team_id = ?", id).Find(&subs).Error
+	if err != nil {
+		return nil, err
+	}
+	for i, _ := range subs {
+		subs[i].Answer = nil
+		subs[i].Challenge.Flag = nil
+	}
+	return subs, nil
 }

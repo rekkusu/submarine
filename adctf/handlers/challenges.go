@@ -277,3 +277,14 @@ func GetCategories(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, result)
 }
+
+func GetSolvedChallenges(c echo.Context) error {
+	db := c.Get("jeopardy").(rules.JeopardyRule).GetDB()
+	team := c.Get("team").(*models.Team)
+	sub, err := models.GetSolvedChallenges(db, team.GetID())
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusOK, sub)
+}
