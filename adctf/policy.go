@@ -1,6 +1,7 @@
 package adctf
 
 import (
+	"github.com/activedefense/submarine/adctf/models"
 	"github.com/casbin/casbin"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
@@ -42,7 +43,11 @@ func CasbinMiddlewareWithConfig(config CasbinConfig) echo.MiddlewareFunc {
 }
 
 func (conf *CasbinConfig) GetRole(c echo.Context) string {
-	return c.Get("role").(string)
+	t, ok := c.Get("team").(*models.Team)
+	if !ok || t == nil {
+		return NotAuthorized
+	}
+	return t.Role
 }
 
 func (conf *CasbinConfig) CheckPermission(c echo.Context) bool {

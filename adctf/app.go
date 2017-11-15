@@ -59,7 +59,7 @@ func New(config ADCTFConfig) *echo.Echo {
 		return func(c echo.Context) error {
 			c.Set("secret", config.JWTSecret)
 			c.Set("jeopardy", jeopardy)
-			c.Set("role", getRole(c))
+			c.Set("team", getTeamFromJWT(c))
 			return next(c)
 		}
 	})
@@ -122,29 +122,29 @@ func New(config ADCTFConfig) *echo.Echo {
 	return e
 }
 
-func getRole(c echo.Context) string {
+func getTeamFromJWT(c echo.Context) *models.Team {
 	if c.Get(JWTKey) == nil {
-		return NotAuthorized
+		return nil
 	}
 
 	token := c.Get(JWTKey).(*jwt.Token)
 	if !token.Valid {
-		return NotAuthorized
+		return nil
 	}
 
 	user, ok := token.Claims.(jwt.MapClaims)["user"]
 	if !ok {
-		return NotAuthorized
+		return nil
 	}
 
 	jeopardy := c.Get("jeopardy").(rules.JeopardyRule)
 	db := jeopardy.GetDB()
 	team, err := models.GetTeam(db, (int)(user.(float64)))
 	if err != nil {
-		return NotAuthorized
+		return nil
 	}
 
-	return team.Role
+	return team
 }
 
 type CustomValidator struct {
