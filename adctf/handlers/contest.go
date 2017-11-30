@@ -45,7 +45,16 @@ func GetAllAnnouncements(c echo.Context) error {
 
 func GetCurrentAnnouncements(c echo.Context) error {
 	db := c.Get("jeopardy").(rules.JeopardyRule).GetDB()
-	announcements, err := models.GetCurrentAnnouncements(db)
+	team := c.Get("team").(*models.Team)
+
+	var announcements []models.Announcement
+	var err error
+	if models.IsAdmin(team) {
+		announcements, err = models.GetAllAnnouncements(db)
+	} else {
+		announcements, err = models.GetCurrentAnnouncements(db)
+	}
+
 	if err != nil {
 		return err
 	}
