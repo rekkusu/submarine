@@ -68,7 +68,7 @@ func NewAnnouncement(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "bad request")
 	}
 
-	if announcement.Message == "" {
+	if announcement.Title == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "bad request")
 	}
 

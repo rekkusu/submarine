@@ -21,7 +21,8 @@ const (
 
 type Announcement struct {
 	ID       int       `json:"id"`
-	Message  string    `json:"message"`
+	Title    string    `json:"title"`
+	Content  string    `json:"content"`
 	PostedAt time.Time `json:"posted_at"`
 }
 
