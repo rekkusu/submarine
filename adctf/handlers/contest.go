@@ -63,6 +63,21 @@ func GetCurrentAnnouncements(c echo.Context) error {
 	return c.JSON(http.StatusOK, announcements)
 }
 
+func GetAnnouncement(c echo.Context) error {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusNotFound, "not found")
+	}
+
+	db := c.Get("jeopardy").(rules.JeopardyRule).GetDB()
+	announcement, err := models.GetAnnouncement(db, id)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusOK, announcement)
+}
+
 func NewAnnouncement(c echo.Context) error {
 	announcement := parseAnnouncement(c)
 	if announcement == nil {

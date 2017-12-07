@@ -89,3 +89,11 @@ func GetCurrentAnnouncements(db *gorm.DB) ([]Announcement, error) {
 	}
 	return announcements, nil
 }
+
+func GetAnnouncement(db *gorm.DB, id int) (*Announcement, error) {
+	var announcement Announcement
+	if err := db.Find(&announcement, id).Error; err != nil {
+		return nil, err
+	}
+	return &announcement, nil
+}
