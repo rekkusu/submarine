@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/activedefense/submarine/adctf/models"
@@ -63,12 +64,8 @@ func GetCurrentAnnouncements(c echo.Context) error {
 }
 
 func NewAnnouncement(c echo.Context) error {
-	var announcement models.Announcement
-	if err := c.Bind(&announcement); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "bad request")
-	}
-
-	if announcement.Title == "" {
+	announcement := parseAnnouncement(c)
+	if announcement == nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "bad request")
 	}
 
@@ -83,4 +80,39 @@ func NewAnnouncement(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, announcement)
+}
+
+func EditAnnouncement(c echo.Context) error {
+	announcement := parseAnnouncement(c)
+	if announcement == nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "bad request")
+	}
+
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "bad request")
+	}
+
+	announcement.ID = id
+
+	db := c.Get("jeopardy").(rules.JeopardyRule).GetDB()
+	if err := announcement.Save(db); err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusOK, announcement)
+}
+
+func parseAnnouncement(c echo.Context) *models.Announcement {
+	var announcement models.Announcement
+	if err := c.Bind(&announcement); err != nil {
+		panic(err)
+		return nil
+	}
+
+	if announcement.Title == "" {
+		return nil
+	}
+
+	return &announcement
 }

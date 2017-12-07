@@ -124,9 +124,12 @@ func New(config ADCTFConfig) *echo.Echo {
 	e.GET("/api/v1/contest", handlers.GetContestInfo)
 	e.PUT("/api/v1/contest", handlers.PutContestInfo)
 
-	e.GET("/api/v1/announcements", handlers.GetCurrentAnnouncements)
-	e.GET("/api/v1/announcements/all", handlers.GetAllAnnouncements)
-	e.POST("/api/v1/announcements", handlers.NewAnnouncement)
+	{
+		announcements := e.Group("/api/v1/announcements")
+		announcements.GET("", handlers.GetCurrentAnnouncements)
+		announcements.POST("", handlers.NewAnnouncement)
+		announcements.PUT("/:id", handlers.EditAnnouncement)
+	}
 
 	return e
 }
