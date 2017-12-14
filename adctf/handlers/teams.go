@@ -27,7 +27,7 @@ func GetTeamByID(c echo.Context) error {
 		return echo.ErrNotFound
 	}
 
-	team, err := j.GetTeam(id)
+	team, err := models.GetTeam(j.GetDB(), id)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return echo.ErrNotFound
@@ -35,7 +35,12 @@ func GetTeamByID(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, team)
+	solved, err := models.GetSolvedChallenges(j.GetDB(), team.GetID())
+
+	return c.JSON(http.StatusOK, struct {
+		*models.Team
+		Solved []models.Submission `json:"solved"`
+	}{team, solved})
 }
 
 func CreateTeam(c echo.Context) error {
