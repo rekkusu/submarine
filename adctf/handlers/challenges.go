@@ -181,6 +181,7 @@ func Submit(c echo.Context) error {
 		if err == models.ErrChallengeHasAlreadySolved {
 			return echo.NewHTTPError(http.StatusConflict, err.Error())
 		}
+
 		return err
 	}
 

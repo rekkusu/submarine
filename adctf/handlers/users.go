@@ -40,16 +40,21 @@ func Signup(c echo.Context) error {
 	}
 
 	db := c.Get("jeopardy").(rules.JeopardyRule).GetDB()
-	if _, err := models.GetTeamByName(db, team.GetName()); err != gorm.ErrRecordNotFound {
+	tx := db.Begin()
+	if _, err := models.GetTeamByName(tx, team.GetName()); err != gorm.ErrRecordNotFound {
+		tx.Rollback()
 		if err == nil {
 			return echo.NewHTTPError(http.StatusConflict, "duplicate")
 		}
 		return err
 	}
 
-	if err := team.Create(db); err != nil {
+	if err := team.Create(tx); err != nil {
+		tx.Rollback()
 		return err
 	}
+
+	tx.Commit()
 
 	return c.JSON(http.StatusCreated, team)
 }
