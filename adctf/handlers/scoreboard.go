@@ -11,6 +11,7 @@ import (
 func GetScoreboard(c echo.Context) error {
 	type record struct {
 		Order int    `json:"order"`
+		ID    int    `json:"id"`
 		Name  string `json:"name"`
 		Score int    `json:"score"`
 	}
@@ -24,6 +25,7 @@ func GetScoreboard(c echo.Context) error {
 	for i, item := range scores {
 		result[i] = record{
 			Order: i + 1,
+			ID:    item.GetTeam().GetID(),
 			Name:  item.GetTeam().GetName(),
 			Score: item.GetScore(),
 		}
