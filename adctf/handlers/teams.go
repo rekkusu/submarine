@@ -36,6 +36,20 @@ func GetTeamByID(c echo.Context) error {
 	}
 
 	solved, err := models.GetSolvedChallenges(j.GetDB(), team.GetID())
+	solves, err := models.GetSolves(j.GetDB())
+
+	for _, chal := range solved {
+		var count int
+		for _, sol := range solves {
+			if sol.ChallengeID == chal.Challenge.ID {
+				count = sol.Solves
+			}
+		}
+		chal.Challenge.Point = j.GetScoring().CalcScore(&models.ChallengeWithSolves{
+			Challenge: *chal.Challenge,
+			Solves:    count,
+		})
+	}
 
 	return c.JSON(http.StatusOK, struct {
 		*models.Team
