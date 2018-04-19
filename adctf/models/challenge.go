@@ -72,6 +72,10 @@ func (c Challenge) Submit(db *gorm.DB, team ctf.Team, answer string) (*Submissio
 		Correct:   correct,
 	}
 
+	if s.Team.Role == "admin" {
+		return s, nil
+	}
+
 	tx := db.Begin()
 
 	solved := !tx.Where("team_id = ? AND challenge_id = ? AND correct = 1", s.Team.ID, s.Challenge.ID).Find(&Submission{}).RecordNotFound()
