@@ -6,6 +6,7 @@ import (
 
 	"github.com/activedefense/submarine/adctf/models"
 	"github.com/activedefense/submarine/rules"
+	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/jinzhu/gorm"
 	"github.com/labstack/echo"
 )
@@ -71,4 +72,33 @@ func CreateTeam(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusCreated, team)
+}
+
+func UpdateTeam(c echo.Context) error {
+	jeopardy := c.Get("jeopardy").(rules.JeopardyRule)
+	db := jeopardy.GetDB()
+
+	claims := c.Get("jwt").(*jwt.Token).Claims.(jwt.MapClaims)
+	team_id := int(claims["user"].(float64))
+	team, err := models.GetTeam(db, team_id)
+
+	if err != nil {
+		return echo.ErrNotFound
+	}
+
+	var form struct {
+		Attributes string `json:"attrs"`
+	}
+
+	if err := c.Bind(&form); err != nil {
+		return err
+	}
+
+	team.Attributes = form.Attributes
+
+	if err := team.Save(db); err != nil {
+		return err
+	}
+
+	return c.NoContent(http.StatusNoContent)
 }

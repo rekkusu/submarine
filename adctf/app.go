@@ -83,6 +83,7 @@ func New(config ADCTFConfig) *echo.Echo {
 		teams := e.Group("/api/v1/teams")
 		teams.GET("", handlers.GetTeams)
 		teams.POST("", handlers.CreateTeam)
+		teams.PATCH("", handlers.UpdateTeam)
 		teams.GET("/:id", handlers.GetTeamByID)
 	}
 

@@ -6,10 +6,11 @@ import (
 )
 
 type Team struct {
-	ID       int    `json:"id"`
-	Username string `json:"username" gorm:"unique_index"`
-	Password string `json:"-"`
-	Role     string `json:"role"`
+	ID         int    `json:"id"`
+	Username   string `json:"username" gorm:"unique_index"`
+	Password   string `json:"-"`
+	Role       string `json:"role"`
+	Attributes string `json:"attrs"`
 }
 
 func (t Team) GetID() int {
@@ -34,6 +35,10 @@ func (u Team) GetTeam() ctf.Team {
 
 func (t *Team) Create(db *gorm.DB) error {
 	return db.Create(t).Error
+}
+
+func (t *Team) Save(db *gorm.DB) error {
+	return db.Save(t).Error
 }
 
 func GetTeams(db *gorm.DB) (teams []Team, err error) {
