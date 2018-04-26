@@ -22,6 +22,7 @@ type ADCTFConfig struct {
 	DriverName     string
 	DataSourceName string
 	JWTSecret      []byte
+	MasterPassword string
 	Debug          bool
 }
 
@@ -58,6 +59,7 @@ func New(config ADCTFConfig) *echo.Echo {
 	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			c.Set("secret", config.JWTSecret)
+			c.Set("password", config.MasterPassword)
 			c.Set("jeopardy", jeopardy)
 			c.Set("team", getTeamFromJWT(c))
 			return next(c)
@@ -114,6 +116,7 @@ func New(config ADCTFConfig) *echo.Echo {
 		users := e.Group("/api/v1/users")
 		users.POST("/signup", handlers.Signup)
 		users.POST("/signin", handlers.Signin)
+		users.PATCH("/priv", handlers.SetPrivilege)
 	}
 
 	{

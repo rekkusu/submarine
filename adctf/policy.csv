@@ -15,6 +15,7 @@ p, normal, /api/v1/challenges/:id/submit, POST
 p, normal, /api/v1/categories, GET
 p, normal, /api/v1/submissions/solved, GET
 p, normal, /api/v1/teams, PATCH
+p, normal, /api/v1/users/priv, PATCH
 
 p, admin, /api/v1/challenges, *
 p, admin, /api/v1/challenges/:id, *

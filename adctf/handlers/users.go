@@ -118,3 +118,36 @@ func Me(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, team)
 }
+
+func SetPrivilege(c echo.Context) error {
+	var form struct {
+		Password string `json:"password"`
+	}
+	if err := c.Bind(&form); err != nil {
+		return c.NoContent(http.StatusBadRequest)
+	}
+
+	if form.Password != c.Get("password").(string) {
+		return echo.ErrForbidden
+	}
+
+	claims := c.Get("jwt").(*jwt.Token).Claims.(jwt.MapClaims)
+	id, ok := claims["user"].(float64)
+	if !ok {
+		return echo.ErrNotFound
+	}
+
+	db := c.Get("jeopardy").(rules.JeopardyRule).GetDB()
+	team, err := models.GetTeam(db, int(id))
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return echo.ErrNotFound
+		}
+		return err
+	}
+
+	team.Role = "admin"
+	team.Save(db)
+
+	return c.NoContent(http.StatusNoContent)
+}
