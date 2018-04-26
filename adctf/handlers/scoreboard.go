@@ -5,6 +5,7 @@ import (
 	"sort"
 	"time"
 
+	"github.com/activedefense/submarine/ctf"
 	"github.com/activedefense/submarine/rules"
 	"github.com/labstack/echo"
 )
@@ -12,8 +13,7 @@ import (
 func GetScoreboard(c echo.Context) error {
 	type record struct {
 		Order          int       `json:"order"`
-		ID             int       `json:"id"`
-		Name           string    `json:"name"`
+		Team           ctf.Team  `json:"team"`
 		Score          int       `json:"score"`
 		LastSubmission time.Time `json:"last"`
 	}
@@ -27,8 +27,7 @@ func GetScoreboard(c echo.Context) error {
 	for i, item := range scores {
 		result[i] = record{
 			Order:          i + 1,
-			ID:             item.GetTeam().GetID(),
-			Name:           item.GetTeam().GetName(),
+			Team:           item.GetTeam(),
 			Score:          item.GetScore(),
 			LastSubmission: item.GetLastSubmission(),
 		}
