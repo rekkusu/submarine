@@ -121,11 +121,10 @@ func EditAnnouncement(c echo.Context) error {
 func parseAnnouncement(c echo.Context) *models.Announcement {
 	var announcement models.Announcement
 	if err := c.Bind(&announcement); err != nil {
-		panic(err)
 		return nil
 	}
 
-	if announcement.Title == "" {
+	if err := c.Validate(announcement); err != nil {
 		return nil
 	}
 

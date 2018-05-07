@@ -21,7 +21,7 @@ const (
 
 type Announcement struct {
 	ID       int       `json:"id"`
-	Title    string    `json:"title"`
+	Title    string    `json:"title" validate:"required"`
 	Content  string    `json:"content"`
 	PostedAt time.Time `json:"posted_at"`
 }
