@@ -118,6 +118,29 @@ func EditAnnouncement(c echo.Context) error {
 	return c.JSON(http.StatusOK, announcement)
 }
 
+func DeleteAnnouncement(c echo.Context) error {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "bad request")
+	}
+
+	tx := c.Get("jeopardy").(rules.JeopardyRule).GetDB().Begin()
+	announcement, err := models.GetAnnouncement(tx, id)
+	if err != nil {
+		tx.Rollback()
+		return echo.ErrNotFound
+	}
+
+	if err := announcement.Delete(tx); err != nil {
+		tx.Rollback()
+		return echo.NewHTTPError(http.StatusInternalServerError, "error")
+	}
+
+	tx.Commit()
+
+	return c.NoContent(http.StatusNoContent)
+}
+
 func parseAnnouncement(c echo.Context) *models.Announcement {
 	var announcement models.Announcement
 	if err := c.Bind(&announcement); err != nil {

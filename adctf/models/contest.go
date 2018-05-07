@@ -74,6 +74,11 @@ func (a *Announcement) Save(db *gorm.DB) error {
 	return err
 }
 
+func (a *Announcement) Delete(db *gorm.DB) error {
+	err := db.Delete(a).Error
+	return err
+}
+
 func GetAllAnnouncements(db *gorm.DB) ([]Announcement, error) {
 	var announcements []Announcement
 	if err := db.Order("posted_at").Find(&announcements).Error; err != nil {
