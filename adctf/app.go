@@ -32,8 +32,16 @@ const (
 )
 
 func New(config ADCTFConfig) *echo.Echo {
-	db, _ := gorm.Open(config.DriverName, config.DataSourceName)
-	db.AutoMigrate(&models.Challenge{}, &models.Submission{}, &models.Team{}, &models.Category{}, &models.ContestInfo{}, &models.Announcement{})
+	db, err := gorm.Open(config.DriverName, config.DataSourceName)
+	if err != nil {
+		panic(err)
+	}
+
+	err = db.AutoMigrate(&models.Challenge{}, &models.Submission{}, &models.Team{}, &models.Category{}, &models.ContestInfo{}, &models.Announcement{}).Error
+
+	if err != nil {
+		panic(err)
+	}
 
 	enforcer := initEnforcer(config)
 
