@@ -1,0 +1,33 @@
+responses:
+  BadRequest:
+    description: BadRequest
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/echo.HTTPError'
+        examples:
+          message: 'bad request'
+  echo.ErrForbidden:
+    description: Forbidden
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/echo.HTTPError'
+        examples:
+          message: 'Forbidden'
+  echo.ErrNotFound:
+    description: Not Found
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/echo.HTTPError'
+        examples:
+          message: 'Not Found'
+  echo.HTTP500Error:
+    description: Server Error
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/echo.HTTPError'
+        examples:
+          message: 'error'

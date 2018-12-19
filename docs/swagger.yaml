@@ -1,0 +1,583 @@
+openapi: 3.0.0
+paths:
+  /teams:
+    get:
+      description: Get all teams
+      responses:
+        '200':
+          description: 'success'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Team'
+    post:
+      description: Create a team
+      requestBody:
+        description: Team object to create
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Team'
+            example:
+              id: 5
+      responses:
+        '201':
+          description: 'created'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Team'
+  /teams/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          example: 1
+    get:
+      description: Get a team by ID
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Team'
+  /challenges:
+    get:
+      description: 'Get all challenges'
+      security:
+        token: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Challenge'
+        '403':
+          $ref: '#/components/responses/echo.ErrForbidden'
+    post:
+      description: 'New challenge'
+      security:
+        token: []
+      requestBody:
+        description: challenge
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Challenge'
+      responses:
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/echo.ErrForbidden'
+  /challenges/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          example: 1
+    get:
+      security:
+        token: []
+      description: 'Get the challenge by ID'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Challenge'
+        '403':
+          $ref: '#/components/responses/echo.ErrForbidden'
+        '404':
+          $ref: '#/components/responses/echo.ErrNotFound'
+    put:
+      security:
+        token: []
+      description: 'Update the challenge'
+      requestBody:
+        description: Challenge
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Challenge'
+      responses:
+        '204':
+          description: 'success'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/echo.ErrForbidden'
+        '404':
+          $ref: '#/components/responses/echo.ErrNotFound'
+    delete:
+      security:
+        token: []
+      description: 'Delete the challenge'
+      responses:
+        '204':
+          description: 'success'
+  /challenges/solves:
+    get:
+      security:
+        token: []
+  /challenges/{id}/submit:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          example: 1
+    post:
+      description: 'Submit the flag'
+      security:
+        token: []
+      requestBody:
+        description: flag
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                flag:
+                  type: string
+            example:
+              flag: FLAG{helloworld}
+  /categories:
+    get:
+      description: 'Get mappings of Category ID and Category Name'
+      security:
+        token: []
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+              example:
+                1: Reversing
+                2: Web
+                3: Pwn
+    post:
+      description: New category
+      security:
+        token: []
+      requestBody:
+        description: Category
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Category'
+            example:
+              name: 'Reversing'
+      responses:
+        '201':
+          description: Created
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/echo.ErrForbidden'
+        '404':
+          $ref: '#/components/responses/echo.ErrNotFound'
+  /categories/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          example: 1
+    put:
+      description: Update category
+      security:
+        token: []
+      requestBody:
+        description: Category
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Category'
+            example:
+              name: 'Reversing'
+      responses:
+        '201':
+          description: Created
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/echo.ErrForbidden'
+        '404':
+          $ref: '#/components/responses/echo.ErrNotFound'
+    delete:
+      description: Delete category
+      security:
+        token: []
+      responses:
+        '204':
+          description: success
+        '403':
+          $ref: '#/components/responses/echo.ErrForbidden'
+        '404':
+          $ref: '#/components/responses/echo.ErrNotFound'
+  /submissions/solved:
+    get:
+      description: Get solved challenges
+      security:
+        token: []
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Submission'
+  /users/signup:
+    post:
+      description: Sign up
+      requestBody:
+        description: User Information
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+                password2:
+                  type: string
+            example:
+              username: user1
+              password: pass1
+              password2: pass1
+      responses:
+        '201':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Team'
+        '400':
+          $ref: '#/components/responsesBadRequest'
+        '409':
+          description: conflict
+  /users/signin:
+    post:
+      description: Sign in
+      requestBody:
+        description: Credentials
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+            example:
+              username: user1
+              password: pass1
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/echo.ErrUnauthorized'
+        '404':
+          $ref: '#/components/responses/echo.ErrNotFound'
+  /users/priv:
+    patch:
+      description: Set administrator flag
+      security:
+        token: []
+      requestBody:
+        description: Password
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                password:
+                  type: string
+            example:
+              password: admin_pass
+      responses:
+        '204':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/echo.ErrForbidden'
+        '404':
+          $ref: '#/components/responses/echo.ErrNotFound'
+  /me:
+    get:
+      description: Get my team
+      security:
+        token: []
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Team'
+        '403':
+          $ref: '#/components/responses/echo.ErrForbidden'
+        '404':
+          $ref: '#/components/responses/echo.ErrNotFound'
+  /scoreboard:
+    get:
+      description: Get scoreboard
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ScoreboardRecord'
+  /contest:
+    get:
+      description: Get contest information
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContestInfo'
+    put:
+      description: Set contest information
+      security:
+        token: []
+      requestBody:
+        description: Contest information
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContestInfo'
+      responses:
+        '204':
+          description: success
+        '400':
+          $ref: '#/components/responses/BadRequest'
+  /announcements:
+    get:
+      description: get all announcements
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Announcement'
+    post:
+      description: Create new announcement
+      security:
+        token: []
+      requestBody:
+        description: Announcement
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Announcement'
+      responses:
+        '201':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Announcement'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+  /announcements/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          example: 1
+    get:
+      description: get the announcement by id
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Announcement'
+        '404':
+          $ref: '#/components/responses/echo.ErrNotFound'
+    put:
+      description: Update announcement
+      security:
+        token: []
+      requestBody:
+        description: Announcement
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Announcement'
+      responses:
+        '204':
+          description: success
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/echo.ErrNotFound'
+    delete:
+      description: Delete announcement
+      security:
+        token: []
+      responses:
+        '204':
+          description: success
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/echo.ErrNotFound'
+
+components:
+  schemas:
+    Team:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        username:
+          type: string
+        role:
+          type: string
+        attrs:
+          type: string
+    Category:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+    Challenge:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        category_id:
+          type: integer
+        title:
+          type: string
+        point:
+          type: integer
+        description:
+          type: string
+        flag:
+          type: string
+          writeOnly: true
+    ScoreboardRecord:
+      type: object
+      properties:
+        order:
+          type: integer
+        team:
+          $ref: '#/components/schemas/Team'
+        score:
+          type: integer
+        last:
+          type: string
+          format: date-time
+    ContestInfo:
+      type: object
+      properties:
+        status:
+          type: string
+    Announcement:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+        content:
+          type: string
+        posted_at:
+          type: string
+          format: date-time
+    echo.HTTPError:
+      type: object
+      properties:
+        message:
+          type: string
+  securitySchemes:
+    token:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  responses:
+    BadRequest:
+      description: BadRequest
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/echo.HTTPError'
+          examples:
+            message: 'bad request'
+    echo.ErrForbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/echo.HTTPError'
+          examples:
+            message: 'Forbidden'
+    echo.ErrNotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/echo.HTTPError'
+          examples:
+            message: 'Not Found'
+    echo.HTTP500Error:
+      description: Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/echo.HTTPError'
+          examples:
+            message: 'error'
