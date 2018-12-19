@@ -66,13 +66,17 @@ func GetCurrentAnnouncements(c echo.Context) error {
 func GetAnnouncement(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusNotFound, "not found")
+		return echo.ErrNotFound
 	}
 
 	db := c.Get("jeopardy").(rules.JeopardyRule).GetDB()
 	announcement, err := models.GetAnnouncement(db, id)
 	if err != nil {
 		return err
+	}
+
+	if announcement == nil {
+		return echo.ErrNotFound
 	}
 
 	return c.JSON(http.StatusOK, announcement)
@@ -94,7 +98,7 @@ func NewAnnouncement(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, announcement)
+	return c.JSON(http.StatusCreated, announcement)
 }
 
 func EditAnnouncement(c echo.Context) error {
@@ -105,7 +109,7 @@ func EditAnnouncement(c echo.Context) error {
 
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "bad request")
+		return echo.ErrNotFound
 	}
 
 	announcement.ID = id
@@ -115,13 +119,13 @@ func EditAnnouncement(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, announcement)
+	return c.NoContent(http.StatusNoContent)
 }
 
 func DeleteAnnouncement(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "bad request")
+		return echo.ErrNotFound
 	}
 
 	tx := c.Get("jeopardy").(rules.JeopardyRule).GetDB().Begin()

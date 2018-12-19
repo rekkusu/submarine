@@ -218,7 +218,7 @@ func UpdateCategory(c echo.Context) error {
 
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Bad Request")
+		return echo.ErrNotFound
 	}
 
 	category.ID = id
@@ -228,6 +228,14 @@ func UpdateCategory(c echo.Context) error {
 	}
 
 	db := c.Get("jeopardy").(rules.JeopardyRule).GetDB()
+
+	_, err = models.GetCategory(db, id)
+	if err == gorm.ErrRecordNotFound {
+		return echo.ErrNotFound
+	} else if err != nil {
+		return err
+	}
+
 	if err := category.Save(db); err != nil {
 		return err
 	}
@@ -237,10 +245,15 @@ func UpdateCategory(c echo.Context) error {
 
 func DeleteCategory(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		return echo.ErrNotFound
+	}
+
 	db := c.Get("jeopardy").(rules.JeopardyRule).GetDB()
+
 	category, err := models.GetCategory(db, id)
 	if err == gorm.ErrRecordNotFound {
-		return echo.NewHTTPError(http.StatusNotFound, "Not found")
+		return echo.ErrNotFound
 	} else if err != nil {
 		return err
 	}

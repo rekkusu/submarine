@@ -97,8 +97,17 @@ func GetCurrentAnnouncements(db *gorm.DB) ([]Announcement, error) {
 
 func GetAnnouncement(db *gorm.DB, id int) (*Announcement, error) {
 	var announcement Announcement
-	if err := db.Find(&announcement, id).Error; err != nil {
+	err := db.Find(&announcement, id).Error
+	if err == gorm.ErrRecordNotFound {
+		return nil, nil
+	} else if err != nil {
 		return nil, err
 	}
+
+	if announcement.PostedAt.After(time.Now()) {
+		// Not released yet
+		return nil, nil
+	}
+
 	return &announcement, nil
 }

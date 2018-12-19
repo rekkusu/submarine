@@ -20,7 +20,7 @@ func Signup(c echo.Context) error {
 	}
 
 	if err := c.Bind(&form); err != nil {
-		return err
+		return echo.NewHTTPError(http.StatusBadRequest, "Bad Request")
 	}
 
 	validate := validator.New()
@@ -66,7 +66,7 @@ func Signin(c echo.Context) error {
 	}
 
 	if err := c.Bind(&form); err != nil {
-		return err
+		return echo.NewHTTPError(http.StatusBadRequest, "Bad Request")
 	}
 
 	db := c.Get("jeopardy").(rules.JeopardyRule).GetDB()
