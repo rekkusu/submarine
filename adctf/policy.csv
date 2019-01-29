@@ -23,6 +23,7 @@ p, admin, /api/v1/categories, *
 p, admin, /api/v1/categories/:id, *
 p, admin, /api/v1/contest, *
 p, admin, /api/v1/announcements, *
+p, admin, /api/v1/announcements/all, *
 
 g, normal, noauth
 g, admin, normal

@@ -143,6 +143,7 @@ func New(config ADCTFConfig) *echo.Echo {
 		announcements.GET("/:id", handlers.GetAnnouncement)
 		announcements.PUT("/:id", handlers.EditAnnouncement)
 		announcements.DELETE("/:id", handlers.DeleteAnnouncement)
+		announcements.GET("/all", handlers.GetAllAnnouncements)
 	}
 
 	return e
