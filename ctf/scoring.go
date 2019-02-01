@@ -4,7 +4,7 @@ import "time"
 
 type Scoring interface {
 	CalcScore(chal Challenge) int
-	GetScores() Scores
+	GetScores(chals []Challenge, submissions []Submission, teams []Team) Scores
 	Recalculate()
 }
 

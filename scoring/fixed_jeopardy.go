@@ -18,9 +18,7 @@ func (scoring FixedJeopardy) CalcScore(chal ctf.Challenge) int {
 func (scoring FixedJeopardy) Recalculate() {
 }
 
-func (scoring FixedJeopardy) GetScores() ctf.Scores {
-	submissions, _ := scoring.Jeopardy.GetSubmissions()
-	teams, _ := scoring.Jeopardy.GetTeams()
+func (scoring FixedJeopardy) GetScores(chals []ctf.Challenge, submissions []ctf.Submission, teams []ctf.Team) ctf.Scores {
 	teams_index := make(map[int]int)
 	var scores ctf.Scores
 

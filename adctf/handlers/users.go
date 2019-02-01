@@ -4,15 +4,14 @@ import (
 	"net/http"
 
 	"github.com/activedefense/submarine/adctf/models"
-	"github.com/activedefense/submarine/rules"
-	jwt "github.com/dgrijalva/jwt-go"
+	"github.com/dgrijalva/jwt-go"
 	"github.com/jinzhu/gorm"
 	"github.com/labstack/echo"
 	"golang.org/x/crypto/bcrypt"
-	validator "gopkg.in/go-playground/validator.v9"
+	"gopkg.in/go-playground/validator.v9"
 )
 
-func Signup(c echo.Context) error {
+func (h *Handler) Signup(c echo.Context) error {
 	var form struct {
 		Username  string `json:"username" validate:"required"`
 		Password  string `json:"password" validate:"required,eqfield=Password2"`
@@ -39,8 +38,7 @@ func Signup(c echo.Context) error {
 		Role:     "normal",
 	}
 
-	db := c.Get("jeopardy").(rules.JeopardyRule).GetDB()
-	tx := db.Begin()
+	tx := h.DB.Begin()
 	if _, err := models.GetTeamByName(tx, team.GetName()); err != gorm.ErrRecordNotFound {
 		tx.Rollback()
 		if err == nil {
@@ -59,7 +57,7 @@ func Signup(c echo.Context) error {
 	return c.JSON(http.StatusCreated, team)
 }
 
-func Signin(c echo.Context) error {
+func (h *Handler) Signin(c echo.Context) error {
 	var form struct {
 		Username string `json:"username"`
 		Password string `json:"password"`
@@ -69,8 +67,7 @@ func Signin(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Bad Request")
 	}
 
-	db := c.Get("jeopardy").(rules.JeopardyRule).GetDB()
-	team, err := models.GetTeamByName(db, form.Username)
+	team, err := models.GetTeamByName(h.DB, form.Username)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return echo.ErrNotFound
@@ -100,15 +97,14 @@ func Signin(c echo.Context) error {
 	})
 }
 
-func Me(c echo.Context) error {
+func (h *Handler) Me(c echo.Context) error {
 	claims := c.Get("jwt").(*jwt.Token).Claims.(jwt.MapClaims)
 	id, ok := claims["user"].(float64)
 	if !ok {
 		return echo.ErrNotFound
 	}
 
-	db := c.Get("jeopardy").(rules.JeopardyRule).GetDB()
-	team, err := models.GetTeam(db, int(id))
+	team, err := models.GetTeam(h.DB, int(id))
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return echo.ErrNotFound
@@ -119,7 +115,7 @@ func Me(c echo.Context) error {
 	return c.JSON(http.StatusOK, team)
 }
 
-func SetPrivilege(c echo.Context) error {
+func (h *Handler) SetPrivilege(c echo.Context) error {
 	var form struct {
 		Password string `json:"password"`
 	}
@@ -137,8 +133,7 @@ func SetPrivilege(c echo.Context) error {
 		return echo.ErrNotFound
 	}
 
-	db := c.Get("jeopardy").(rules.JeopardyRule).GetDB()
-	team, err := models.GetTeam(db, int(id))
+	team, err := models.GetTeam(h.DB, int(id))
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return echo.ErrNotFound
@@ -147,7 +142,7 @@ func SetPrivilege(c echo.Context) error {
 	}
 
 	team.Role = "admin"
-	team.Save(db)
+	team.Save(h.DB)
 
 	return c.NoContent(http.StatusNoContent)
 }

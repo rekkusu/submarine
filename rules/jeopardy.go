@@ -6,10 +6,9 @@ import (
 )
 
 type JeopardyRule interface {
-	GetDB() *gorm.DB
-	GetChallenges() ([]ctf.Challenge, error)
-	GetSubmissions() ([]ctf.Submission, error)
-	GetTeams() ([]ctf.Team, error)
-	GetTeam(id int) (ctf.Team, error)
+	GetChallenges(db *gorm.DB) ([]ctf.Challenge, error)
+	GetSubmissions(db *gorm.DB) ([]ctf.Submission, error)
+	GetTeams(db *gorm.DB) ([]ctf.Team, error)
+	GetTeam(db *gorm.DB, id int) (ctf.Team, error)
 	GetScoring() ctf.Scoring
 }

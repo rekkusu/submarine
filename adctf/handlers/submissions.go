@@ -3,13 +3,11 @@ package handlers
 import (
 	"net/http"
 
-	"github.com/activedefense/submarine/rules"
 	"github.com/labstack/echo"
 )
 
-func GetSubmissions(c echo.Context) error {
-	j, _ := c.Get("jeopardy").(rules.JeopardyRule)
-	subs, err := j.GetSubmissions()
+func (h *Handler) GetSubmissions(c echo.Context) error {
+	subs, err := h.Jeopardy.GetSubmissions(h.DB)
 	if err != nil {
 		return err
 	}

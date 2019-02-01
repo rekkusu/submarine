@@ -6,11 +6,10 @@ import (
 	"time"
 
 	"github.com/activedefense/submarine/ctf"
-	"github.com/activedefense/submarine/rules"
 	"github.com/labstack/echo"
 )
 
-func GetScoreboard(c echo.Context) error {
+func (h *Handler) GetScoreboard(c echo.Context) error {
 	type record struct {
 		Order          int       `json:"order"`
 		Team           ctf.Team  `json:"team"`
@@ -18,8 +17,11 @@ func GetScoreboard(c echo.Context) error {
 		LastSubmission time.Time `json:"last"`
 	}
 
-	j, _ := c.Get("jeopardy").(rules.JeopardyRule)
-	scores := j.GetScoring().GetScores()
+	challenges, _ := h.Jeopardy.GetChallenges(h.DB)
+	submissions, _ := h.Jeopardy.GetSubmissions(h.DB)
+	teams, _ := h.Jeopardy.GetTeams(h.DB)
+
+	scores := h.Jeopardy.GetScoring().GetScores(challenges, submissions, teams)
 
 	sort.Stable(scores)
 

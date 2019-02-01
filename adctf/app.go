@@ -1,21 +1,17 @@
 package adctf
 
 import (
-	"math"
 	"reflect"
 	"strings"
 
 	"github.com/activedefense/submarine/adctf/handlers"
 	"github.com/activedefense/submarine/adctf/models"
-	"github.com/activedefense/submarine/ctf"
-	"github.com/activedefense/submarine/rules"
-	"github.com/activedefense/submarine/scoring"
 	"github.com/casbin/casbin"
-	jwt "github.com/dgrijalva/jwt-go"
+	"github.com/dgrijalva/jwt-go"
 	"github.com/jinzhu/gorm"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
-	validator "gopkg.in/go-playground/validator.v9"
+	"gopkg.in/go-playground/validator.v9"
 )
 
 type ADCTFConfig struct {
@@ -45,10 +41,6 @@ func New(config ADCTFConfig) *echo.Echo {
 
 	enforcer := initEnforcer(config)
 
-	jeopardy := &Jeopardy{
-		DB: db,
-	}
-
 	e := echo.New()
 	e.Debug = config.Debug
 	e.Use(middleware.Logger())
@@ -68,8 +60,7 @@ func New(config ADCTFConfig) *echo.Echo {
 		return func(c echo.Context) error {
 			c.Set("secret", config.JWTSecret)
 			c.Set("password", config.MasterPassword)
-			c.Set("jeopardy", jeopardy)
-			c.Set("team", getTeamFromJWT(c))
+			c.Set("team", getTeamFromJWT(db, c))
 			return next(c)
 		}
 	})
@@ -89,67 +80,69 @@ func New(config ADCTFConfig) *echo.Echo {
 
 	e.Validator = &CustomValidator{validate}
 
+	handler := handlers.Handler{db, &Jeopardy{}}
+
 	{
 		teams := e.Group("/api/v1/teams")
-		teams.GET("", handlers.GetTeams)
-		teams.POST("", handlers.CreateTeam)
-		teams.PATCH("", handlers.UpdateTeam)
-		teams.GET("/:id", handlers.GetTeamByID)
+		teams.GET("", handler.GetTeams)
+		teams.POST("", handler.CreateTeam)
+		teams.PATCH("", handler.UpdateTeam)
+		teams.GET("/:id", handler.GetTeamByID)
 	}
 
 	{
 		chals := e.Group("/api/v1/challenges")
-		chals.GET("", handlers.GetChallenges)
-		chals.POST("", handlers.CreateChallenge)
-		chals.GET("/:id", handlers.GetChallengeByID)
-		chals.PUT("/:id", handlers.UpdateChallenge)
-		chals.DELETE("/:id", handlers.DeleteChallenge)
-		chals.POST("/:id/submit", handlers.Submit)
+		chals.GET("", handler.GetChallenges)
+		chals.POST("", handler.CreateChallenge)
+		chals.GET("/:id", handler.GetChallengeByID)
+		chals.PUT("/:id", handler.UpdateChallenge)
+		chals.DELETE("/:id", handler.DeleteChallenge)
+		chals.POST("/:id/submit", handler.Submit)
 	}
 
 	{
 		cate := e.Group("/api/v1/categories")
-		cate.GET("", handlers.GetCategories)
-		cate.POST("", handlers.CreateCategory)
-		cate.PUT("/:id", handlers.UpdateCategory)
-		cate.DELETE("/:id", handlers.DeleteCategory)
+		cate.GET("", handler.GetCategories)
+		cate.POST("", handler.CreateCategory)
+		cate.PUT("/:id", handler.UpdateCategory)
+		cate.DELETE("/:id", handler.DeleteCategory)
 	}
 
 	{
 		submissions := e.Group("/api/v1/submissions")
-		submissions.GET("/solved", handlers.GetSolvedChallenges)
+		submissions.GET("/solved", handler.GetSolvedChallenges)
 	}
 
 	{
 		users := e.Group("/api/v1/users")
-		users.POST("/signup", handlers.Signup)
-		users.POST("/signin", handlers.Signin)
-		users.PATCH("/priv", handlers.SetPrivilege)
+		users.POST("/signup", handler.Signup)
+		users.POST("/signin", handler.Signin)
+		users.PATCH("/priv", handler.SetPrivilege)
 	}
 
 	{
 		me := e.Group("/api/v1/me")
-		me.GET("", handlers.Me)
+		me.GET("", handler.Me)
 	}
 
-	e.GET("/api/v1/scoreboard", handlers.GetScoreboard)
-	e.GET("/api/v1/contest", handlers.GetContestInfo)
-	e.PUT("/api/v1/contest", handlers.PutContestInfo)
+	e.GET("/api/v1/scoreboard", handler.GetScoreboard)
+	e.GET("/api/v1/contest", handler.GetContestInfo)
+	e.PUT("/api/v1/contest", handler.PutContestInfo)
 
 	{
 		announcements := e.Group("/api/v1/announcements")
-		announcements.GET("", handlers.GetCurrentAnnouncements)
-		announcements.POST("", handlers.NewAnnouncement)
-		announcements.GET("/:id", handlers.GetAnnouncement)
-		announcements.PUT("/:id", handlers.EditAnnouncement)
-		announcements.DELETE("/:id", handlers.DeleteAnnouncement)
-		announcements.GET("/all", handlers.GetAllAnnouncements)
+		announcements.GET("", handler.GetCurrentAnnouncements)
+		announcements.POST("", handler.NewAnnouncement)
+		announcements.GET("/:id", handler.GetAnnouncement)
+		announcements.PUT("/:id", handler.EditAnnouncement)
+		announcements.DELETE("/:id", handler.DeleteAnnouncement)
+		announcements.GET("/all", handler.GetAllAnnouncements)
 	}
 
 	return e
 }
 
-func getTeamFromJWT(c echo.Context) *models.Team {
+func getTeamFromJWT(db *gorm.DB, c echo.Context) *models.Team {
 	if c.Get(JWTKey) == nil {
 		return nil
 	}
@@ -164,8 +157,6 @@ func getTeamFromJWT(c echo.Context) *models.Team {
 		return nil
 	}
 
-	jeopardy := c.Get("jeopardy").(rules.JeopardyRule)
-	db := jeopardy.GetDB()
 	team, err := models.GetTeam(db, (int)(user.(float64)))
 	if err != nil {
 		return nil
@@ -180,66 +171,6 @@ type CustomValidator struct {
 
 func (cv *CustomValidator) Validate(i interface{}) error {
 	return cv.validate.Struct(i)
-}
-
-type Jeopardy struct {
-	DB *gorm.DB
-}
-
-func (j Jeopardy) GetDB() *gorm.DB {
-	return j.DB
-}
-
-func (j Jeopardy) GetChallenges() ([]ctf.Challenge, error) {
-	chals, err := models.GetChallengesWithSolves(j.DB)
-	if err != nil {
-		return nil, err
-	}
-	ret := make([]ctf.Challenge, len(chals))
-	for i, _ := range chals {
-		ret[i] = &chals[i]
-	}
-	return ret, nil
-}
-
-func (j Jeopardy) GetSubmissions() ([]ctf.Submission, error) {
-	sub, err := models.GetSubmissions(j.DB)
-	if err != nil {
-		return nil, err
-	}
-	ret := make([]ctf.Submission, len(sub))
-	for i, _ := range sub {
-		ret[i] = &sub[i]
-	}
-	return ret, nil
-}
-
-func (j Jeopardy) GetTeams() ([]ctf.Team, error) {
-	teams, err := models.GetTeams(j.DB)
-	if err != nil {
-		return nil, err
-	}
-	ret := make([]ctf.Team, len(teams))
-	for i, _ := range teams {
-		ret[i] = &teams[i]
-	}
-	return ret, nil
-}
-
-func (j Jeopardy) GetTeam(id int) (ctf.Team, error) {
-	return models.GetTeam(j.DB, id)
-}
-
-func (j Jeopardy) GetScoring() ctf.Scoring {
-	return &scoring.DynamicJeopardy{
-		Jeopardy: j,
-		Expression: func(base, solves int) int {
-			if solves == 0 {
-				return base
-			}
-			return int(math.Max(float64(base/100), float64(base)/math.Cbrt(float64(solves))))
-		},
-	}
 }
 
 func initEnforcer(config ADCTFConfig) *casbin.Enforcer {

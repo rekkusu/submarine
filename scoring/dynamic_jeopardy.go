@@ -19,10 +19,7 @@ func (scoring DynamicJeopardy) CalcScore(chal ctf.Challenge) int {
 func (scoring DynamicJeopardy) Recalculate() {
 }
 
-func (scoring DynamicJeopardy) GetScores() ctf.Scores {
-	chals, _ := scoring.Jeopardy.GetChallenges()
-	submissions, _ := scoring.Jeopardy.GetSubmissions()
-	teams, _ := scoring.Jeopardy.GetTeams()
+func (scoring DynamicJeopardy) GetScores(chals []ctf.Challenge, submissions []ctf.Submission, teams []ctf.Team) ctf.Scores {
 	teams_index := make(map[int]int)
 	var scores ctf.Scores
 
@@ -37,6 +34,8 @@ func (scoring DynamicJeopardy) GetScores() ctf.Scores {
 		}
 
 		score := scores[teams_index[item.GetTeam().GetID()]].(*score)
+
+		// Convert Challenge(WithoutSolves) -> ChallengeWithSolves
 		var chal ctf.Challenge
 		for _, c := range chals {
 			if c.GetID() == item.GetChallenge().GetID() {

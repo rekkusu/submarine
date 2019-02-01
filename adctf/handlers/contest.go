@@ -6,13 +6,11 @@ import (
 	"time"
 
 	"github.com/activedefense/submarine/adctf/models"
-	"github.com/activedefense/submarine/rules"
 	"github.com/labstack/echo"
 )
 
-func GetContestInfo(c echo.Context) error {
-	db := c.Get("jeopardy").(rules.JeopardyRule).GetDB()
-	info, err := models.GetContestInfo(db)
+func (h *Handler) GetContestInfo(c echo.Context) error {
+	info, err := models.GetContestInfo(h.DB)
 	if err != nil {
 		return err
 	}
@@ -20,23 +18,21 @@ func GetContestInfo(c echo.Context) error {
 	return c.JSON(http.StatusOK, info)
 }
 
-func PutContestInfo(c echo.Context) error {
+func (h *Handler) PutContestInfo(c echo.Context) error {
 	var info models.ContestInfo
 	if err := c.Bind(&info); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "bad request")
 	}
 
-	db := c.Get("jeopardy").(rules.JeopardyRule).GetDB()
-	if err := models.SetContestStatus(db, info); err != nil {
+	if err := models.SetContestStatus(h.DB, info); err != nil {
 		return err
 	}
 
 	return c.NoContent(http.StatusNoContent)
 }
 
-func GetAllAnnouncements(c echo.Context) error {
-	db := c.Get("jeopardy").(rules.JeopardyRule).GetDB()
-	announcements, err := models.GetAllAnnouncements(db)
+func (h *Handler) GetAllAnnouncements(c echo.Context) error {
+	announcements, err := models.GetAllAnnouncements(h.DB)
 	if err != nil {
 		return err
 	}
@@ -44,10 +40,8 @@ func GetAllAnnouncements(c echo.Context) error {
 	return c.JSON(http.StatusOK, announcements)
 }
 
-func GetCurrentAnnouncements(c echo.Context) error {
-	db := c.Get("jeopardy").(rules.JeopardyRule).GetDB()
-
-	announcements, err := models.GetCurrentAnnouncements(db)
+func (h *Handler) GetCurrentAnnouncements(c echo.Context) error {
+	announcements, err := models.GetCurrentAnnouncements(h.DB)
 	if err != nil {
 		return err
 	}
@@ -55,14 +49,13 @@ func GetCurrentAnnouncements(c echo.Context) error {
 	return c.JSON(http.StatusOK, announcements)
 }
 
-func GetAnnouncement(c echo.Context) error {
+func (h *Handler) GetAnnouncement(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		return echo.ErrNotFound
 	}
 
-	db := c.Get("jeopardy").(rules.JeopardyRule).GetDB()
-	announcement, err := models.GetAnnouncement(db, id)
+	announcement, err := models.GetAnnouncement(h.DB, id)
 	if err != nil {
 		return err
 	}
@@ -74,7 +67,7 @@ func GetAnnouncement(c echo.Context) error {
 	return c.JSON(http.StatusOK, announcement)
 }
 
-func NewAnnouncement(c echo.Context) error {
+func (h *Handler) NewAnnouncement(c echo.Context) error {
 	announcement := parseAnnouncement(c)
 	if announcement == nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "bad request")
@@ -85,15 +78,14 @@ func NewAnnouncement(c echo.Context) error {
 		announcement.PostedAt = time.Now()
 	}
 
-	db := c.Get("jeopardy").(rules.JeopardyRule).GetDB()
-	if err := announcement.Create(db); err != nil {
+	if err := announcement.Create(h.DB); err != nil {
 		return err
 	}
 
 	return c.JSON(http.StatusCreated, announcement)
 }
 
-func EditAnnouncement(c echo.Context) error {
+func (h *Handler) EditAnnouncement(c echo.Context) error {
 	announcement := parseAnnouncement(c)
 	if announcement == nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "bad request")
@@ -106,21 +98,20 @@ func EditAnnouncement(c echo.Context) error {
 
 	announcement.ID = id
 
-	db := c.Get("jeopardy").(rules.JeopardyRule).GetDB()
-	if err := announcement.Save(db); err != nil {
+	if err := announcement.Save(h.DB); err != nil {
 		return err
 	}
 
 	return c.NoContent(http.StatusNoContent)
 }
 
-func DeleteAnnouncement(c echo.Context) error {
+func (h *Handler) DeleteAnnouncement(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		return echo.ErrNotFound
 	}
 
-	tx := c.Get("jeopardy").(rules.JeopardyRule).GetDB().Begin()
+	tx := h.DB.Begin()
 	announcement, err := models.GetAnnouncement(tx, id)
 	if err != nil {
 		tx.Rollback()
