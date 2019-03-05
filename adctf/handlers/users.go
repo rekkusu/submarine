@@ -13,7 +13,7 @@ import (
 
 func (h *Handler) Signup(c echo.Context) error {
 	var form struct {
-		Username  string `json:"username" validate:"required"`
+		Username  string `json:"username" validate:"required,min=4,max=32"`
 		Password  string `json:"password" validate:"required,eqfield=Password2"`
 		Password2 string `json:"password2" validate:"required"`
 	}
