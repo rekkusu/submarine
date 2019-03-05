@@ -94,6 +94,7 @@ func New(config ADCTFConfig) *echo.Echo {
 		chals := e.Group("/api/v1/challenges")
 		chals.GET("", handler.GetChallenges)
 		chals.POST("", handler.CreateChallenge)
+		chals.GET("/solved", handler.GetSolvedChallenges)
 		chals.GET("/:id", handler.GetChallengeByID)
 		chals.PUT("/:id", handler.UpdateChallenge)
 		chals.DELETE("/:id", handler.DeleteChallenge)
@@ -110,7 +111,7 @@ func New(config ADCTFConfig) *echo.Echo {
 
 	{
 		submissions := e.Group("/api/v1/submissions")
-		submissions.GET("/solved", handler.GetSolvedChallenges)
+		submissions.GET("", handler.GetSubmissions)
 	}
 
 	{

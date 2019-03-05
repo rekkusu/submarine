@@ -11,14 +11,15 @@ p, noauth, /api/v1/announcements, GET
 p, normal, /api/v1/me, GET
 p, normal, /api/v1/challenges, GET
 p, normal, /api/v1/challenges/solves, GET
+p, normal, /api/v1/challenges/solved, GET
 p, normal, /api/v1/challenges/:id/submit, POST
 p, normal, /api/v1/categories, GET
-p, normal, /api/v1/submissions/solved, GET
 p, normal, /api/v1/teams, PATCH
 p, normal, /api/v1/users/priv, PATCH
 
 p, admin, /api/v1/challenges, *
 p, admin, /api/v1/challenges/:id, *
+p, normal, /api/v1/submissions, GET
 p, admin, /api/v1/categories, *
 p, admin, /api/v1/categories/:id, *
 p, admin, /api/v1/contest, *
