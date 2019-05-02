@@ -1,0 +1,41 @@
+module github.com/activedefense/submarine
+
+go 1.12
+
+require (
+	github.com/Knetic/govaluate v3.0.0+incompatible
+	github.com/PuerkitoBio/purell v1.1.1
+	github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578
+	github.com/alecthomas/template v0.0.0-20160405071501-a0175ee3bccc
+	github.com/casbin/casbin v1.5.0
+	github.com/davecgh/go-spew v1.1.1
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/go-openapi/jsonpointer v0.18.0
+	github.com/go-openapi/jsonreference v0.18.0
+	github.com/go-openapi/spec v0.18.0
+	github.com/go-openapi/swag v0.18.0
+	github.com/go-playground/locales v0.12.1
+	github.com/go-playground/universal-translator v0.16.0
+	github.com/go-sql-driver/mysql v1.3.0
+	github.com/jinzhu/gorm v1.9.1
+	github.com/jinzhu/inflection v0.0.0-20180308033659-04140366298a
+	github.com/labstack/echo v3.3.5+incompatible
+	github.com/labstack/gommon v0.0.0-20180426014445-588f4e8bddc6
+	github.com/mailru/easyjson v0.0.0-20190221075403-6243d8e04c3f
+	github.com/mattn/go-colorable v0.0.9
+	github.com/mattn/go-isatty v0.0.4
+	github.com/mattn/go-sqlite3 v1.6.0
+	github.com/pkg/errors v0.8.1
+	github.com/pmezard/go-difflib v1.0.0
+	github.com/stretchr/testify v1.2.2
+	github.com/swaggo/swag v1.4.1
+	github.com/valyala/bytebufferpool v1.0.0
+	github.com/valyala/fasttemplate v0.0.0-20170224212429-dcecefd839c4
+	golang.org/x/crypto v0.0.0-20180505025534-4ec37c66abab
+	golang.org/x/net v0.0.0-20190301231341-16b79f2e4e95
+	golang.org/x/sys v0.0.0-20180504064212-6f686a352de6
+	golang.org/x/text v0.3.0
+	golang.org/x/tools v0.0.0-20190305160728-f8c04913dfb7
+	gopkg.in/go-playground/validator.v9 v9.16.0
+	gopkg.in/yaml.v2 v2.2.2
+)
