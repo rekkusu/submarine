@@ -1,13 +1,13 @@
 package handlers
 
 import (
-	"net/http"
-
+	"github.com/activedefense/submarine/adctf/models"
 	"github.com/labstack/echo"
+	"net/http"
 )
 
 func (h *Handler) GetSubmissions(c echo.Context) error {
-	subs, err := h.Jeopardy.GetSubmissions(h.DB)
+	subs, err := models.GetSubmissions(h.DB)
 	if err != nil {
 		return err
 	}

@@ -10,6 +10,33 @@
   version = "v3.0.0"
 
 [[projects]]
+  digest = "1:a2682518d905d662d984ef9959984ef87cecb777d379bfa9d9fe40e78069b3e4"
+  name = "github.com/PuerkitoBio/purell"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "44968752391892e1b0d0b821ee79e9a85fa13049"
+  version = "v1.1.1"
+
+[[projects]]
+  branch = "master"
+  digest = "1:c739832d67eb1e9cc478a19cc1a1ccd78df0397bf8a32978b759152e205f644b"
+  name = "github.com/PuerkitoBio/urlesc"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "de5bf2ad457846296e2031421a34e2568e304e35"
+
+[[projects]]
+  branch = "master"
+  digest = "1:315c5f2f60c76d89b871c73f9bd5fe689cad96597afd50fb9992228ef80bdd34"
+  name = "github.com/alecthomas/template"
+  packages = [
+    ".",
+    "parse",
+  ]
+  pruneopts = "UT"
+  revision = "a0175ee3bccc567396460bf5acd36800cb10c49c"
+
+[[projects]]
   digest = "1:92f64d93682cc8687489d318cbce5a16ce57af6d71e70fcedaf82376b66709fd"
   name = "github.com/casbin/casbin"
   packages = [
@@ -42,6 +69,38 @@
   pruneopts = "UT"
   revision = "06ea1031745cb8b3dab3f6a236daf2b0aa468b7e"
   version = "v3.2.0"
+
+[[projects]]
+  digest = "1:953a2628e4c5c72856b53f5470ed5e071c55eccf943d798d42908102af2a610f"
+  name = "github.com/go-openapi/jsonpointer"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "ef5f0afec364d3b9396b7b77b43dbe26bf1f8004"
+  version = "v0.18.0"
+
+[[projects]]
+  digest = "1:81210e0af657a0fb3638932ec68e645236bceefa4c839823db0c4d918f080895"
+  name = "github.com/go-openapi/jsonreference"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "8483a886a90412cd6858df4ea3483dce9c8e35a3"
+  version = "v0.18.0"
+
+[[projects]]
+  digest = "1:08656ef9c5a45ddccb7f206ca2d67e12e9fcda4122a83dc0544b5c967267cefa"
+  name = "github.com/go-openapi/spec"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "5b6cdde3200976e3ecceb2868706ee39b6aff3e4"
+  version = "v0.18.0"
+
+[[projects]]
+  digest = "1:0005186c6608dd542239ac8e4f4f1e2e7c24d493e999113c46b93332f0362fc0"
+  name = "github.com/go-openapi/swag"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "1d29f06aebd59ccdf11ae04aa0334ded96e2d909"
+  version = "v0.18.0"
 
 [[projects]]
   digest = "1:e1ff887e232b2d8f4f7c7db15a5fac7be418025afc4dda53c59c765dbb5aa6b4"
@@ -111,6 +170,18 @@
   version = "0.2.5"
 
 [[projects]]
+  branch = "master"
+  digest = "1:84a5a2b67486d5d67060ac393aa255d05d24ed5ee41daecd5635ec22657b6492"
+  name = "github.com/mailru/easyjson"
+  packages = [
+    "buffer",
+    "jlexer",
+    "jwriter",
+  ]
+  pruneopts = "UT"
+  revision = "6243d8e04c3f819e79757e8bc3faa15c3cb27003"
+
+[[projects]]
   digest = "1:c658e84ad3916da105a761660dcaeb01e63416c8ec7bc62256a9b411a05fcd67"
   name = "github.com/mattn/go-colorable"
   packages = ["."]
@@ -159,6 +230,14 @@
   version = "v1.2.1"
 
 [[projects]]
+  digest = "1:57c5cd2fd7ab0f4508a47512e68ff0477b4b167bf2a14256c165e9c1476f05e4"
+  name = "github.com/swaggo/swag"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "d95e114626732976ed73a165365089d6e21986cc"
+  version = "v1.4.1"
+
+[[projects]]
   branch = "master"
   digest = "1:c468422f334a6b46a19448ad59aaffdfc0a36b08fdcc1c749a0b29b6453d7e59"
   name = "github.com/valyala/bytebufferpool"
@@ -189,11 +268,56 @@
 
 [[projects]]
   branch = "master"
+  digest = "1:82491a0790e0945762096c875e2e14932a5d7b37a7ce3e83ef3b50437a71e09a"
+  name = "golang.org/x/net"
+  packages = ["idna"]
+  pruneopts = "UT"
+  revision = "16b79f2e4e95ea23b2bf9903c9809ff7b013ce85"
+
+[[projects]]
+  branch = "master"
   digest = "1:59fdb8bf86a81a5bff0e1a6c39d06f09251c627aeab82d64d3431cf4014d10d7"
   name = "golang.org/x/sys"
   packages = ["unix"]
   pruneopts = "UT"
   revision = "6f686a352de66814cdd080d970febae7767857a3"
+
+[[projects]]
+  digest = "1:0c56024909189aee3364b7f21a95a27459f718aa7c199a5c111c36cfffd9eaef"
+  name = "golang.org/x/text"
+  packages = [
+    "collate",
+    "collate/build",
+    "internal/colltab",
+    "internal/gen",
+    "internal/tag",
+    "internal/triegen",
+    "internal/ucd",
+    "language",
+    "secure/bidirule",
+    "transform",
+    "unicode/bidi",
+    "unicode/cldr",
+    "unicode/norm",
+    "unicode/rangetable",
+    "width",
+  ]
+  pruneopts = "UT"
+  revision = "f21a4dfb5e38f5895301dc265a8def02365cc3d0"
+  version = "v0.3.0"
+
+[[projects]]
+  branch = "master"
+  digest = "1:a99b52ff45e7b215b683682e89a52f6598869684a8917d0a7f8136cb16eab553"
+  name = "golang.org/x/tools"
+  packages = [
+    "go/ast/astutil",
+    "go/buildutil",
+    "go/internal/cgo",
+    "go/loader",
+  ]
+  pruneopts = "UT"
+  revision = "f8c04913dfb7b2339a756441456bdbe0af6eb508"
 
 [[projects]]
   digest = "1:603172bf2660e1de219fcf9332917bcb361abd80d479f29ed3148f0856a65976"
@@ -203,10 +327,19 @@
   revision = "ee0bbdea519c2c66777c6bfc943838291734ba6c"
   version = "v9.16.0"
 
+[[projects]]
+  digest = "1:4d2e5a73dc1500038e504a8d78b986630e3626dc027bc030ba5c75da257cdb96"
+  name = "gopkg.in/yaml.v2"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "51d6538a90f86fe93ac480b35f37b2be17fef232"
+  version = "v2.2.2"
+
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/alecthomas/template",
     "github.com/casbin/casbin",
     "github.com/dgrijalva/jwt-go",
     "github.com/go-sql-driver/mysql",
@@ -215,6 +348,7 @@
     "github.com/labstack/echo/middleware",
     "github.com/mattn/go-sqlite3",
     "github.com/stretchr/testify/assert",
+    "github.com/swaggo/swag",
     "golang.org/x/crypto/bcrypt",
     "gopkg.in/go-playground/validator.v9",
   ]

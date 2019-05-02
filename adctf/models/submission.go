@@ -28,12 +28,20 @@ func (s Submission) GetID() int {
 	return s.ID
 }
 
+func (s Submission) GetTeamID() int {
+	return s.TeamID
+}
+
 func (s Submission) GetTeam() ctf.Team {
 	return s.Team
 }
 
 func (s Submission) GetUser() ctf.User {
 	return s.Team
+}
+
+func (s Submission) GetChallengeID() int {
+	return s.ChallengeID
 }
 
 func (s Submission) GetChallenge() ctf.Challenge {
@@ -73,7 +81,46 @@ func (s *Submission) Create(db *gorm.DB) error {
 }
 
 func GetSubmissions(db *gorm.DB) (submissions []Submission, err error) {
-	err = db.Preload("Team").Preload("Challenge").Find(&submissions).Error
+	teams, err := GetTeams(db)
+	if err != nil {
+		return nil, err
+	}
+
+	challenges, err := GetChallenges(db)
+	if err != nil {
+		return nil, err
+	}
+
+	if err = db.Find(&submissions).Error; err != nil {
+		return nil, err
+	}
+
+	for i, _ := range submissions {
+		submissions[i].Team = &teams[submissions[i].TeamID-1]
+		submissions[i].Challenge = &challenges[submissions[i].ChallengeID-1]
+	}
+	return
+}
+
+func GetCorrectSubmissions(db *gorm.DB) (submissions []Submission, err error) {
+	teams, err := GetTeams(db)
+	if err != nil {
+		return nil, err
+	}
+
+	challenges, err := GetChallenges(db)
+	if err != nil {
+		return nil, err
+	}
+
+	if err = db.Where("correct == 1").Find(&submissions).Error; err != nil {
+		return nil, err
+	}
+
+	for i, _ := range submissions {
+		submissions[i].Team = &teams[submissions[i].TeamID-1]
+		submissions[i].Challenge = &challenges[submissions[i].ChallengeID-1]
+	}
 	return
 }
 
@@ -96,7 +143,10 @@ func GetSolvedChallenges(db *gorm.DB, id int) ([]Submission, error) {
 	}
 	for i, _ := range subs {
 		subs[i].Answer = nil
-		subs[i].Challenge.Flag = nil
+		if subs[i].Challenge != nil {
+			subs[i].Challenge.Flag = nil
+
+		}
 	}
 	return subs, nil
 }

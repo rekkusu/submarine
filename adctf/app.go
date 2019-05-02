@@ -1,6 +1,8 @@
 package adctf
 
 import (
+	"github.com/activedefense/submarine/adctf/scoring"
+	"math"
 	"reflect"
 	"strings"
 
@@ -80,7 +82,17 @@ func New(config ADCTFConfig) *echo.Echo {
 
 	e.Validator = &CustomValidator{validate}
 
-	handler := handlers.Handler{db, &Jeopardy{}}
+	handler := handlers.Handler{
+		DB:       db,
+		Scoring: scoring.DynamicJeopardy{
+			Expression: func(base, solves int) int {
+				if solves == 0 {
+					return base
+				}
+				return int(math.Max(float64(base/100), float64(base)/math.Cbrt(float64(solves))))
+			},
+		},
+	}
 
 	{
 		teams := e.Group("/api/v1/teams")

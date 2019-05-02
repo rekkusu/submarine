@@ -24,7 +24,7 @@ func (h *Handler) GetChallenges(c echo.Context) error {
 
 	for i, c := range chals {
 		chals[i].Flag = nil
-		chals[i].Point = h.Jeopardy.GetScoring().CalcScore(&c)
+		chals[i].Point = h.Scoring.CalcScore(c)
 	}
 
 	return c.JSON(http.StatusOK, chals)
@@ -175,7 +175,7 @@ func (h *Handler) Submit(c echo.Context) error {
 		return err
 	}
 
-	h.Jeopardy.GetScoring().Recalculate()
+	h.Scoring.Update()
 
 	return c.JSON(http.StatusAccepted, sub)
 }

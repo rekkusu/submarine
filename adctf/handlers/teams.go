@@ -11,7 +11,7 @@ import (
 )
 
 func (h *Handler) GetTeams(c echo.Context) error {
-	teams, err := h.Jeopardy.GetTeams(h.DB)
+	teams, err := models.GetTeams(h.DB)
 	if err != nil {
 		return err
 	}
@@ -43,7 +43,7 @@ func (h *Handler) GetTeamByID(c echo.Context) error {
 				count = sol.Solves
 			}
 		}
-		chal.Challenge.Point = h.Jeopardy.GetScoring().CalcScore(&models.ChallengeWithSolves{
+		chal.Challenge.Point = h.Scoring.CalcScore(models.ChallengeWithSolves{
 			Challenge: *chal.Challenge,
 			Solves:    count,
 		})

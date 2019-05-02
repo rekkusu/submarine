@@ -1,8 +1,8 @@
 package handlers
 
 import (
+	"github.com/activedefense/submarine/adctf/models"
 	"net/http"
-	"sort"
 	"time"
 
 	"github.com/activedefense/submarine/ctf"
@@ -17,21 +17,21 @@ func (h *Handler) GetScoreboard(c echo.Context) error {
 		LastSubmission time.Time `json:"last"`
 	}
 
-	challenges, _ := h.Jeopardy.GetChallenges(h.DB)
-	submissions, _ := h.Jeopardy.GetSubmissions(h.DB)
-	teams, _ := h.Jeopardy.GetTeams(h.DB)
+	challenges, _ := models.GetChallengesWithSolves(h.DB)
+	submissions, _ := models.GetCorrectSubmissions(h.DB)
+	teams, _ := models.GetTeams(h.DB)
 
-	scores := h.Jeopardy.GetScoring().GetScores(challenges, submissions, teams)
+	scores := h.Scoring.GetScores(challenges, submissions, teams)
 
-	sort.Stable(scores)
+	//sort.Stable(scores)
 
 	result := make([]record, len(scores))
 	for i, item := range scores {
 		result[i] = record{
 			Order:          i + 1,
-			Team:           item.GetTeam(),
-			Score:          item.GetScore(),
-			LastSubmission: item.GetLastSubmission(),
+			Team:           item.Team,
+			Score:          item.Score,
+			LastSubmission: item.LastSubmission,
 		}
 	}
 
