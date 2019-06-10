@@ -3,6 +3,7 @@ package handlers
 import (
 	"github.com/activedefense/submarine/adctf/models"
 	"net/http"
+	"sort"
 	"time"
 
 	"github.com/activedefense/submarine/ctf"
@@ -23,7 +24,12 @@ func (h *Handler) GetScoreboard(c echo.Context) error {
 
 	scores := h.Scoring.GetScores(challenges, submissions, teams)
 
-	//sort.Stable(scores)
+	sort.Slice(scores, func(i, j int) bool {
+		if scores[i].GetScore() == scores[j].GetScore() {
+			return scores[i].GetLastSubmission().Before(scores[j].GetLastSubmission())
+		}
+		return scores[i].GetScore() > scores[j].GetScore()
+	})
 
 	result := make([]record, len(scores))
 	for i, item := range scores {
