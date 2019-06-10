@@ -21,6 +21,7 @@ func (j Jeopardy) GetChallenges(db *gorm.DB) ([]ctf.Challenge, error) {
 	return ret, nil
 }
 
+/*
 func (j Jeopardy) GetSubmissions(db *gorm.DB) ([]ctf.Submission, error) {
 	sub, err := models.GetSubmissions(db)
 	if err != nil {
@@ -34,6 +35,7 @@ func (j Jeopardy) GetSubmissions(db *gorm.DB) ([]ctf.Submission, error) {
 	}
 	return ret, nil
 }
+ */
 
 func (j Jeopardy) GetTeams(db *gorm.DB) ([]ctf.Team, error) {
 	teams, err := models.GetTeams(db)

@@ -80,7 +80,15 @@ func (s *Submission) Create(db *gorm.DB) error {
 	return nil
 }
 
-func GetSubmissions(db *gorm.DB) (submissions []Submission, err error) {
+func GetSubmissionCount(db *gorm.DB) (int, error) {
+	var count int
+	if err := db.Model(&Submission{}).Count(&count).Error; err != nil {
+		return -1, err
+	}
+	return count, nil
+}
+
+func GetSubmissions(db *gorm.DB, offset, limit int) (submissions []Submission, err error) {
 	teams, err := GetTeams(db)
 	if err != nil {
 		return nil, err
@@ -91,7 +99,7 @@ func GetSubmissions(db *gorm.DB) (submissions []Submission, err error) {
 		return nil, err
 	}
 
-	if err = db.Find(&submissions).Error; err != nil {
+	if err = db.Offset(offset).Limit(limit).Find(&submissions).Error; err != nil {
 		return nil, err
 	}
 
