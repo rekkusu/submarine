@@ -5,7 +5,7 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-type Team struct {
+type User struct {
 	ID         int    `json:"id"`
 	Username   string `json:"username" gorm:"unique_index"`
 	Password   string `json:"-"`
@@ -13,49 +13,53 @@ type Team struct {
 	Attributes string `json:"attrs"`
 }
 
-func (t Team) GetID() int {
+func (t User) GetID() int {
 	return t.ID
 }
 
-func (t Team) GetName() string {
+func (t User) GetName() string {
 	return t.Username
 }
 
-func (u Team) GetUsername() string {
+func (u User) GetUsername() string {
 	return u.Username
 }
 
-func (u Team) GetPassword() string {
+func (u User) GetPassword() string {
 	return u.Password
 }
 
-func (u Team) GetTeam() ctf.Team {
+func (u User) GetTeam() ctf.Team {
 	return u
 }
 
-func (t *Team) Create(db *gorm.DB) error {
+func (u User) GetRole() string {
+	return u.Role
+}
+
+func (t *User) Create(db *gorm.DB) error {
 	return db.Create(t).Error
 }
 
-func (t *Team) Save(db *gorm.DB) error {
+func (t *User) Save(db *gorm.DB) error {
 	return db.Save(t).Error
 }
 
-func GetTeams(db *gorm.DB) (teams []Team, err error) {
+func GetTeams(db *gorm.DB) (teams []User, err error) {
 	err = db.Find(&teams).Error
 	return
 }
 
-func GetTeam(db *gorm.DB, id int) (*Team, error) {
-	var t Team
+func GetTeam(db *gorm.DB, id int) (*User, error) {
+	var t User
 	if err := db.First(&t, id).Error; err != nil {
 		return nil, err
 	}
 	return &t, nil
 }
 
-func GetTeamByName(db *gorm.DB, name string) (*Team, error) {
-	var t Team
+func GetTeamByName(db *gorm.DB, name string) (*User, error) {
+	var t User
 	if err := db.First(&t, "username=?", name).Error; err != nil {
 		return nil, err
 	}

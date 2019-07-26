@@ -3,8 +3,8 @@ package adctf
 import (
 	"github.com/activedefense/submarine/adctf/models"
 	"github.com/casbin/casbin"
-	"github.com/labstack/echo"
-	"github.com/labstack/echo/middleware"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 type CasbinConfig struct {
@@ -43,7 +43,7 @@ func CasbinMiddlewareWithConfig(config CasbinConfig) echo.MiddlewareFunc {
 }
 
 func (conf *CasbinConfig) GetRole(c echo.Context) string {
-	t, ok := c.Get("team").(*models.Team)
+	t, ok := c.Get("team").(*models.User)
 	if !ok || t == nil {
 		return NotAuthorized
 	}

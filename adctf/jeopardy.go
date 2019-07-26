@@ -30,7 +30,7 @@ func (j Jeopardy) GetSubmissions(db *gorm.DB) ([]ctf.Submission, error) {
 	ret := make([]ctf.Submission, len(sub))
 	for i := range sub {
 		sub[i].Challenge = nil
-		sub[i].Team = nil
+		sub[i].User = nil
 		ret[i] = &sub[i]
 	}
 	return ret, nil

@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"github.com/activedefense/submarine/adctf/models"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 	"net/http"
 	"strconv"
 )
@@ -28,9 +28,9 @@ func (h *Handler) GetSubmissions(c echo.Context) error {
 		return err
 	}
 
-	result := struct{
+	result := struct {
 		Submissions []models.Submission `json:"submissions"`
-		Total int `json:"total"`
+		Total       int                 `json:"total"`
 	}{
 		subs,
 		count,

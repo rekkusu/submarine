@@ -6,7 +6,7 @@ import (
 	"github.com/activedefense/submarine/adctf/models"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/jinzhu/gorm"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/go-playground/validator.v9"
 )
@@ -32,7 +32,7 @@ func (h *Handler) Signup(c echo.Context) error {
 		return err
 	}
 
-	team := &models.Team{
+	team := &models.User{
 		Username: form.Username,
 		Password: string(passhash),
 		Role:     "normal",

@@ -62,23 +62,24 @@ func (c *Challenge) Delete(db *gorm.DB) error {
 	return db.Delete(c).Error
 }
 
-func (c Challenge) Submit(db *gorm.DB, team ctf.Team, answer string) (*Submission, error) {
+func (c Challenge) Submit(db *gorm.DB, team ctf.Team, user ctf.User, answer string) (*Submission, error) {
 	correct := c.GetFlag() == answer
 
 	s := &Submission{
-		Team:      team.(*Team),
+		TeamID:    team.GetID(),
+		UserID:    user.GetID(),
 		Challenge: &c,
 		Answer:    &answer,
 		Correct:   correct,
 	}
 
-	if s.Team.Role == "admin" {
+	if user.GetRole() == "admin" {
 		return s, nil
 	}
 
 	tx := db.Begin()
 
-	solved := !tx.Where("team_id = ? AND challenge_id = ? AND correct = 1", s.Team.ID, s.Challenge.ID).Find(&Submission{}).RecordNotFound()
+	solved := !tx.Where("team_id = ? AND challenge_id = ? AND correct = 1", team.GetID(), c.ID).Find(&Submission{}).RecordNotFound()
 
 	if solved {
 		tx.Rollback()

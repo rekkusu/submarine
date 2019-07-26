@@ -7,7 +7,7 @@ import (
 	"github.com/activedefense/submarine/adctf/models"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/jinzhu/gorm"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 )
 
 func (h *Handler) GetTeams(c echo.Context) error {
@@ -50,13 +50,13 @@ func (h *Handler) GetTeamByID(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, struct {
-		*models.Team
+		*models.User
 		Solved []models.Submission `json:"solved"`
 	}{team, solved})
 }
 
 func (h *Handler) CreateTeam(c echo.Context) error {
-	team := &models.Team{}
+	team := &models.User{}
 	if err := c.Bind(team); err != nil {
 		return err
 	}

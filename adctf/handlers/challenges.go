@@ -7,11 +7,11 @@ import (
 	"github.com/activedefense/submarine/adctf/models"
 	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/jinzhu/gorm"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 )
 
 func (h *Handler) GetChallenges(c echo.Context) error {
-	team := c.Get("team").(*models.Team)
+	team := c.Get("team").(*models.User)
 
 	if models.IsContestClosed(h.DB) && !models.IsAdmin(team) {
 		return echo.ErrForbidden
@@ -36,7 +36,7 @@ func (h *Handler) GetChallengeByID(c echo.Context) error {
 		return echo.ErrNotFound
 	}
 
-	team := c.Get("team").(*models.Team)
+	team := c.Get("team").(*models.User)
 	if models.IsContestClosed(h.DB) && !models.IsAdmin(team) {
 		return echo.ErrForbidden
 	}
@@ -166,7 +166,7 @@ func (h *Handler) Submit(c echo.Context) error {
 		return err
 	}
 
-	sub, err := chal.Submit(h.DB, team, form.Answer)
+	sub, err := chal.Submit(h.DB, team, team, form.Answer)
 	if err != nil {
 		if err == models.ErrChallengeHasAlreadySolved {
 			return echo.NewHTTPError(http.StatusConflict, err.Error())
@@ -265,7 +265,7 @@ func (h *Handler) GetCategories(c echo.Context) error {
 }
 
 func (h *Handler) GetSolvedChallenges(c echo.Context) error {
-	team := c.Get("team").(*models.Team)
+	team := c.Get("team").(*models.User)
 	sub, err := models.GetSolvedChallenges(h.DB, team.GetID())
 	if err != nil {
 		return err

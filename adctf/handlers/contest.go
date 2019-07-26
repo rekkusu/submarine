@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/activedefense/submarine/adctf/models"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 )
 
 func (h *Handler) GetContestInfo(c echo.Context) error {

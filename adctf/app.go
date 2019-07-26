@@ -11,8 +11,8 @@ import (
 	"github.com/casbin/casbin"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/jinzhu/gorm"
-	"github.com/labstack/echo"
-	"github.com/labstack/echo/middleware"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"gopkg.in/go-playground/validator.v9"
 )
 
@@ -35,7 +35,7 @@ func New(config ADCTFConfig) *echo.Echo {
 		panic(err)
 	}
 
-	err = db.AutoMigrate(&models.Challenge{}, &models.Submission{}, &models.Team{}, &models.Category{}, &models.ContestInfo{}, &models.Announcement{}).Error
+	err = db.AutoMigrate(&models.Challenge{}, &models.Submission{}, &models.User{}, &models.Category{}, &models.ContestInfo{}, &models.Announcement{}).Error
 
 	if err != nil {
 		panic(err)
@@ -83,7 +83,7 @@ func New(config ADCTFConfig) *echo.Echo {
 	e.Validator = &CustomValidator{validate}
 
 	handler := handlers.Handler{
-		DB:       db,
+		DB: db,
 		Scoring: scoring.DynamicJeopardy{
 			Expression: func(base, solves int) int {
 				if solves == 0 {
@@ -155,7 +155,7 @@ func New(config ADCTFConfig) *echo.Echo {
 	return e
 }
 
-func getTeamFromJWT(db *gorm.DB, c echo.Context) *models.Team {
+func getTeamFromJWT(db *gorm.DB, c echo.Context) *models.User {
 	if c.Get(JWTKey) == nil {
 		return nil
 	}

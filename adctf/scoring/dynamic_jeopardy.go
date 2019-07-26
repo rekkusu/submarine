@@ -16,7 +16,7 @@ func (scoring DynamicJeopardy) CalcScore(chal models.ChallengeWithSolves) int {
 func (scoring DynamicJeopardy) Update() {
 }
 
-func (scoring DynamicJeopardy) GetScores(chals []models.ChallengeWithSolves, submissions []models.Submission, teams []models.Team) []*ScoreRecord {
+func (scoring DynamicJeopardy) GetScores(chals []models.ChallengeWithSolves, submissions []models.Submission, teams []models.User) []*ScoreRecord {
 	teams_index := make(map[int]int)
 	var scores []*ScoreRecord
 

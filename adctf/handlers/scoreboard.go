@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/activedefense/submarine/ctf"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 )
 
 func (h *Handler) GetScoreboard(c echo.Context) error {

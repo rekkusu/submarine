@@ -15,8 +15,10 @@ var (
 
 type Submission struct {
 	ID          int        `json:"id" gorm:"primary_key;AUTO_INCREMENT"`
-	Team        *Team      `json:"team,omitempty" gorm:"ForeignKey:TeamID"`
+	Team        ctf.Team   `json:"team,omitempty" gorm:"-"`
 	TeamID      int        `json:"-"`
+	User        ctf.User   `json:"user,omitempty" gorm:"-"`
+	UserID      int        `json:"-"`
 	Challenge   *Challenge `json:"challenge,omitempty" gorm:"ForeignKey:ChallengeID"`
 	ChallengeID int        `json:"-"`
 	Answer      *string    `json:"answer,omitempty"`
@@ -37,7 +39,7 @@ func (s Submission) GetTeam() ctf.Team {
 }
 
 func (s Submission) GetUser() ctf.User {
-	return s.Team
+	return s.User
 }
 
 func (s Submission) GetChallengeID() int {
@@ -63,7 +65,7 @@ func (s Submission) GetSubmittedAt() time.Time {
 func (s *Submission) Create(db *gorm.DB) error {
 	tx := db.Begin()
 
-	solved := !tx.Where("team_id = ? AND challenge_id = ? AND correct = 1", s.Team.ID, s.Challenge.ID).Find(&Submission{}).RecordNotFound()
+	solved := !tx.Where("team_id = ? AND challenge_id = ? AND correct = 1", s.Team.GetID(), s.Challenge.ID).Find(&Submission{}).RecordNotFound()
 
 	if solved {
 		tx.Rollback()

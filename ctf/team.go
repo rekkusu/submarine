@@ -10,6 +10,7 @@ type User interface {
 	GetTeam() Team
 	GetUsername() string
 	GetPassword() string
+	GetRole() string
 }
 
 type TeamStore interface {

@@ -4,7 +4,7 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-func IsAdmin(team *Team) bool {
+func IsAdmin(team *User) bool {
 	return team != nil && team.Role == "admin"
 }
 

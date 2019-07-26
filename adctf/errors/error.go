@@ -1,6 +1,6 @@
 package errors
 
-import "github.com/labstack/echo"
+import "github.com/labstack/echo/v4"
 
 type ApplicationError struct {
 	StatusCode int
