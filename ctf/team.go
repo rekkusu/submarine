@@ -7,14 +7,8 @@ type Team interface {
 
 type User interface {
 	GetID() int
-	GetTeam() Team
+	GetTeamID() int
 	GetUsername() string
 	GetPassword() string
 	GetRole() string
-}
-
-type TeamStore interface {
-	AllTeams() ([]Team, error)
-	GetTeam(id int) (Team, error)
-	SaveTeam(t Team) error
 }

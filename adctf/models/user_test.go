@@ -11,7 +11,7 @@ import (
 func TestGetTeams(t *testing.T) {
 	db, _, _, expect := initDB()
 
-	teams, err := GetTeams(db)
+	teams, err := GetUsers(db)
 	if err != nil {
 		t.Error(err)
 		return
@@ -29,14 +29,14 @@ func TestGetTeam(t *testing.T) {
 
 	tests := []struct {
 		id     int
-		expect *Team
+		expect *User
 	}{
 		{1, expect[0]},
 		{100, nil},
 	}
 
 	for _, test := range tests {
-		team, _ := GetTeam(db, test.id)
+		team, _ := GetUser(db, test.id)
 		expect, _ := json.Marshal(test.expect)
 		actual, _ := json.Marshal(team)
 		assert.JSONEq(t, string(expect), string(actual))
@@ -47,15 +47,15 @@ func TestTeamCreate(t *testing.T) {
 	db, _, _, _ := initDB()
 
 	tests := []struct {
-		team   *Team
+		team   *User
 		expect error
 	}{
 		{
-			&Team{Username: "test1"},
+			&User{Username: "test1"},
 			nil,
 		},
 		{
-			&Team{ID: 1, Username: "test2"},
+			&User{ID: 1, Username: "test2"},
 			sqlite3.ErrConstraintPrimaryKey,
 		},
 	}

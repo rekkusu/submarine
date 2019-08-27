@@ -1,0 +1,11 @@
+[db]
+driver = "sqlite3"
+source = "submarine.db?parseTime=true"
+
+[app]
+secret = "e81061ace8c9e0b568c00075ecda0d8c42d"
+admin_password = "ahirufhafvuahf"
+listen = "localhost:8000"
+
+[ctf]
+team = true

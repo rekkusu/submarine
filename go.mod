@@ -17,7 +17,8 @@ require (
 	github.com/labstack/echo/v4 v4.1.6
 	github.com/mailru/easyjson v0.0.0-20190221075403-6243d8e04c3f // indirect
 	github.com/mattn/go-sqlite3 v1.10.0
-	github.com/spf13/cobra v0.0.5 // indirect
+	github.com/spf13/cobra v0.0.5
+	github.com/spf13/viper v1.3.2
 	github.com/stretchr/testify v1.3.0
 	github.com/swaggo/swag v1.4.1
 	golang.org/x/crypto v0.0.0-20190605123033-f99c8df09eb5

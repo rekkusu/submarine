@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"fmt"
+	"github.com/activedefense/submarine/adctf/config"
 	"net/http"
 
 	"github.com/activedefense/submarine/adctf/models"
@@ -13,9 +15,14 @@ import (
 
 func (h *Handler) Signup(c echo.Context) error {
 	var form struct {
-		Username  string `json:"username" validate:"required,min=4,max=32"`
-		Password  string `json:"password" validate:"required,eqfield=Password2"`
-		Password2 string `json:"password2" validate:"required"`
+		Username  string `json:"Username" validate:"required,min=4,max=32"`
+		Password  string `json:"Password" validate:"required,eqfield=Password2"`
+		Password2 string `json:"Password2" validate:"required"`
+		Team      struct {
+			Mode         string `validate:"required"`
+			TeamName     string `json:"name" validate:"required,min=2"`
+			TeamPassword string `json:"Password" validate:"required,min=8"`
+		} `json:"Team"`
 	}
 
 	if err := c.Bind(&form); err != nil {
@@ -27,19 +34,38 @@ func (h *Handler) Signup(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
+	fmt.Printf("%s\n", form.Team.Mode)
 	passhash, err := bcrypt.GenerateFromPassword([]byte(form.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return err
 	}
 
-	team := &models.User{
+	tx := h.DB.Begin()
+	if !config.CTF.Team {
+		form.Team.Mode = "create"
+		form.Team.TeamName = form.Username
+		form.Team.TeamPassword = form.Password
+	}
+
+	if form.Team.Mode == "create" {
+		_, err := models.GetTeamFromName(tx, form.Team.TeamName)
+		if err == nil { // Found existing team
+			return echo.NewHTTPError(http.StatusConflict, "duplicate team name")
+		}
+
+		_, err = models.CreateTeam(tx, form.Team.TeamName, form.Team.TeamPassword)
+		if err != nil {
+			return err
+		}
+	}
+
+	user := &models.User{
 		Username: form.Username,
 		Password: string(passhash),
 		Role:     "normal",
 	}
 
-	tx := h.DB.Begin()
-	if _, err := models.GetTeamByName(tx, team.GetName()); err != gorm.ErrRecordNotFound {
+	if _, err := models.GetUserByName(tx, user.GetName()); err != gorm.ErrRecordNotFound {
 		tx.Rollback()
 		if err == nil {
 			return echo.NewHTTPError(http.StatusConflict, "duplicate")
@@ -47,27 +73,34 @@ func (h *Handler) Signup(c echo.Context) error {
 		return err
 	}
 
-	if err := team.Create(tx); err != nil {
+	if err := user.Create(tx); err != nil {
 		tx.Rollback()
 		return err
 	}
 
+	err = models.JoinTeam(tx, user.ID, form.Team.TeamName, form.Team.TeamPassword)
+	if err != nil {
+		tx.Rollback()
+		return err
+		return echo.NewHTTPError(http.StatusUnauthorized, "Team error")
+	}
+
 	tx.Commit()
 
-	return c.JSON(http.StatusCreated, team)
+	return c.JSON(http.StatusCreated, user)
 }
 
 func (h *Handler) Signin(c echo.Context) error {
 	var form struct {
-		Username string `json:"username"`
-		Password string `json:"password"`
+		Username string `json:"Username"`
+		Password string `json:"Password"`
 	}
 
 	if err := c.Bind(&form); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "Bad Request")
 	}
 
-	team, err := models.GetTeamByName(h.DB, form.Username)
+	team, err := models.GetUserByName(h.DB, form.Username)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return echo.ErrNotFound
@@ -104,7 +137,7 @@ func (h *Handler) Me(c echo.Context) error {
 		return echo.ErrNotFound
 	}
 
-	team, err := models.GetTeam(h.DB, int(id))
+	team, err := models.GetUser(h.DB, int(id))
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return echo.ErrNotFound
@@ -117,13 +150,13 @@ func (h *Handler) Me(c echo.Context) error {
 
 func (h *Handler) SetPrivilege(c echo.Context) error {
 	var form struct {
-		Password string `json:"password"`
+		Password string `json:"Password"`
 	}
 	if err := c.Bind(&form); err != nil {
 		return c.NoContent(http.StatusBadRequest)
 	}
 
-	if form.Password != c.Get("password").(string) {
+	if form.Password != c.Get("Password").(string) {
 		return echo.ErrForbidden
 	}
 
@@ -133,7 +166,7 @@ func (h *Handler) SetPrivilege(c echo.Context) error {
 		return echo.ErrNotFound
 	}
 
-	team, err := models.GetTeam(h.DB, int(id))
+	team, err := models.GetUser(h.DB, int(id))
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return echo.ErrNotFound

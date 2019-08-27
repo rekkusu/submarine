@@ -9,7 +9,7 @@ import (
 
 type ScoringRule interface {
 	CalcScore(chal models.ChallengeWithSolves) int
-	GetScores(chals []models.ChallengeWithSolves, submissions []models.Submission, teams []models.User) []*ScoreRecord
+	GetScores(chals []models.ChallengeWithSolves, submissions []models.Submission, teams []ctf.Team) []*ScoreRecord
 	Update()
 }
 

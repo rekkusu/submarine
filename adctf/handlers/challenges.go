@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"github.com/activedefense/submarine/adctf/config"
+	"github.com/activedefense/submarine/ctf"
 	"net/http"
 	"strconv"
 
@@ -11,9 +13,9 @@ import (
 )
 
 func (h *Handler) GetChallenges(c echo.Context) error {
-	team := c.Get("team").(*models.User)
+	user := c.Get("user").(*models.User)
 
-	if models.IsContestClosed(h.DB) && !models.IsAdmin(team) {
+	if models.IsContestClosed(h.DB) && !models.IsAdmin(user) {
 		return echo.ErrForbidden
 	}
 
@@ -36,8 +38,9 @@ func (h *Handler) GetChallengeByID(c echo.Context) error {
 		return echo.ErrNotFound
 	}
 
-	team := c.Get("team").(*models.User)
-	if models.IsContestClosed(h.DB) && !models.IsAdmin(team) {
+	user := c.Get("user").(*models.User)
+
+	if models.IsContestClosed(h.DB) && !models.IsAdmin(user) {
 		return echo.ErrForbidden
 	}
 
@@ -153,10 +156,20 @@ func (h *Handler) Submit(c echo.Context) error {
 	}
 
 	claims := c.Get("jwt").(*jwt.Token).Claims.(jwt.MapClaims)
-	team_id := int(claims["user"].(float64))
-	team, err := models.GetTeam(h.DB, team_id)
+	user_id := int(claims["user"].(float64))
+	user, err := models.GetUser(h.DB, user_id)
 	if err != nil {
 		return err
+	}
+
+	var team ctf.Team
+	if config.CTF.Team {
+		team, err = models.GetTeam(h.DB, user.TeamID)
+		if err != nil {
+			return err
+		}
+	} else {
+		team = user
 	}
 
 	chal, err := models.GetChallenge(h.DB, id)
@@ -166,7 +179,7 @@ func (h *Handler) Submit(c echo.Context) error {
 		return err
 	}
 
-	sub, err := chal.Submit(h.DB, team, team, form.Answer)
+	sub, err := chal.Submit(h.DB, team, user, form.Answer)
 	if err != nil {
 		if err == models.ErrChallengeHasAlreadySolved {
 			return echo.NewHTTPError(http.StatusConflict, err.Error())
@@ -265,7 +278,17 @@ func (h *Handler) GetCategories(c echo.Context) error {
 }
 
 func (h *Handler) GetSolvedChallenges(c echo.Context) error {
-	team := c.Get("team").(*models.User)
+	var team ctf.Team
+	var err error
+	if config.CTF.Team {
+		user := c.Get("user").(*models.User)
+		team, err = models.GetTeam(h.DB, user.GetTeamID())
+		if err != nil {
+			return err
+		}
+	} else {
+		team = c.Get("user").(*models.User)
+	}
 	sub, err := models.GetSolvedChallenges(h.DB, team.GetID())
 	if err != nil {
 		return err

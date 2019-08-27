@@ -35,22 +35,10 @@ func (j Jeopardy) GetSubmissions(db *gorm.DB) ([]ctf.Submission, error) {
 	}
 	return ret, nil
 }
- */
-
-func (j Jeopardy) GetTeams(db *gorm.DB) ([]ctf.Team, error) {
-	teams, err := models.GetTeams(db)
-	if err != nil {
-		return nil, err
-	}
-	ret := make([]ctf.Team, len(teams))
-	for i := range teams {
-		ret[i] = &teams[i]
-	}
-	return ret, nil
-}
+*/
 
 func (j Jeopardy) GetTeam(db *gorm.DB, id int) (ctf.Team, error) {
-	return models.GetTeam(db, id)
+	return models.GetUser(db, id)
 }
 
 func (j Jeopardy) GetScoring() ctf.Scoring {

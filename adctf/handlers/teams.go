@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"github.com/activedefense/submarine/ctf"
 	"net/http"
 	"strconv"
 
@@ -50,13 +51,13 @@ func (h *Handler) GetTeamByID(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, struct {
-		*models.User
+		ctf.Team
 		Solved []models.Submission `json:"solved"`
 	}{team, solved})
 }
 
 func (h *Handler) CreateTeam(c echo.Context) error {
-	team := &models.User{}
+	team := &models.Team{}
 	if err := c.Bind(team); err != nil {
 		return err
 	}
@@ -73,7 +74,7 @@ func (h *Handler) CreateTeam(c echo.Context) error {
 func (h *Handler) UpdateTeam(c echo.Context) error {
 	claims := c.Get("jwt").(*jwt.Token).Claims.(jwt.MapClaims)
 	team_id := int(claims["user"].(float64))
-	team, err := models.GetTeam(h.DB, team_id)
+	team, err := models.GetUser(h.DB, team_id)
 
 	if err != nil {
 		return echo.ErrNotFound

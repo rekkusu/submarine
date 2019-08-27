@@ -1,6 +1,7 @@
 package adctf
 
 import (
+	"github.com/activedefense/submarine/adctf/config"
 	"github.com/activedefense/submarine/adctf/scoring"
 	"math"
 	"reflect"
@@ -17,11 +18,19 @@ import (
 )
 
 type ADCTFConfig struct {
-	DriverName     string
-	DataSourceName string
-	JWTSecret      []byte
-	MasterPassword string
-	Debug          bool
+	Db struct {
+		Driver string
+		Source string
+	}
+	App struct {
+		Secret        []byte
+		AdminPassword string
+		Debug         bool
+		Listen        string
+	}
+	CTF struct {
+		Team bool
+	}
 }
 
 const (
@@ -29,27 +38,33 @@ const (
 	NotAuthorized = "noauth"
 )
 
-func New(config ADCTFConfig) *echo.Echo {
-	db, err := gorm.Open(config.DriverName, config.DataSourceName)
+func New() *echo.Echo {
+	db, err := gorm.Open(config.DB.Driver, config.DB.Source)
 	if err != nil {
 		panic(err)
 	}
 
-	err = db.AutoMigrate(&models.Challenge{}, &models.Submission{}, &models.User{}, &models.Category{}, &models.ContestInfo{}, &models.Announcement{}).Error
+	err = db.AutoMigrate(&models.Challenge{},
+		&models.Submission{},
+		&models.User{},
+		&models.Team{},
+		&models.Category{},
+		&models.ContestInfo{},
+		&models.Announcement{}).Error
 
 	if err != nil {
 		panic(err)
 	}
 
-	enforcer := initEnforcer(config)
+	enforcer := initEnforcer()
 
 	e := echo.New()
-	e.Debug = config.Debug
+	e.Debug = config.App.Debug
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 	e.Use(middleware.JWTWithConfig(middleware.JWTConfig{
 		ContextKey: JWTKey,
-		SigningKey: config.JWTSecret,
+		SigningKey: []byte(config.App.Secret),
 		Skipper: func(c echo.Context) bool {
 			if c.Request().Header.Get("Authorization") == "" {
 				return true
@@ -60,9 +75,9 @@ func New(config ADCTFConfig) *echo.Echo {
 
 	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			c.Set("secret", config.JWTSecret)
-			c.Set("password", config.MasterPassword)
-			c.Set("team", getTeamFromJWT(db, c))
+			c.Set("secret", []byte(config.App.Secret))
+			c.Set("password", []byte(config.App.AdminPassword))
+			c.Set("user", getUserFromJWT(db, c))
 			return next(c)
 		}
 	})
@@ -155,7 +170,7 @@ func New(config ADCTFConfig) *echo.Echo {
 	return e
 }
 
-func getTeamFromJWT(db *gorm.DB, c echo.Context) *models.User {
+func getUserFromJWT(db *gorm.DB, c echo.Context) *models.User {
 	if c.Get(JWTKey) == nil {
 		return nil
 	}
@@ -170,7 +185,7 @@ func getTeamFromJWT(db *gorm.DB, c echo.Context) *models.User {
 		return nil
 	}
 
-	team, err := models.GetTeam(db, (int)(user.(float64)))
+	team, err := models.GetUser(db, (int)(user.(float64)))
 	if err != nil {
 		return nil
 	}
@@ -186,7 +201,7 @@ func (cv *CustomValidator) Validate(i interface{}) error {
 	return cv.validate.Struct(i)
 }
 
-func initEnforcer(config ADCTFConfig) *casbin.Enforcer {
+func initEnforcer() *casbin.Enforcer {
 	enforcer := casbin.NewEnforcer("adctf/policy.conf", "adctf/policy.csv")
 
 	return enforcer

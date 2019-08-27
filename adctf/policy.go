@@ -43,7 +43,7 @@ func CasbinMiddlewareWithConfig(config CasbinConfig) echo.MiddlewareFunc {
 }
 
 func (conf *CasbinConfig) GetRole(c echo.Context) string {
-	t, ok := c.Get("team").(*models.User)
+	t, ok := c.Get("user").(*models.User)
 	if !ok || t == nil {
 		return NotAuthorized
 	}

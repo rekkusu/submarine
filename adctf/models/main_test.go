@@ -2,7 +2,7 @@ package models
 
 import "github.com/jinzhu/gorm"
 
-func initDB() (*gorm.DB, []*Challenge, []*Submission, []*Team) {
+func initDB() (*gorm.DB, []*Challenge, []*Submission, []*User) {
 	chals := []*Challenge{
 		&Challenge{Title: "Test1", Point: 100, Description: "Desc1", Flag: "Flag1"},
 		&Challenge{Title: "Test2", Point: 200, Description: "Desc2", Flag: "Flag2"},
@@ -11,11 +11,11 @@ func initDB() (*gorm.DB, []*Challenge, []*Submission, []*Team) {
 		&Challenge{Title: "Test5", Point: 500, Description: "Desc5", Flag: "Flag5"},
 	}
 
-	teams := []*Team{
-		&Team{Username: "user1"},
-		&Team{Username: "user2"},
-		&Team{Username: "user3"},
-		&Team{Username: "user4"},
+	teams := []*User{
+		&User{Username: "user1"},
+		&User{Username: "user2"},
+		&User{Username: "user3"},
+		&User{Username: "user4"},
 	}
 
 	submissions := []*Submission{
@@ -24,7 +24,7 @@ func initDB() (*gorm.DB, []*Challenge, []*Submission, []*Team) {
 
 	db, _ := gorm.Open("sqlite3", ":memory:?parseTime=true")
 	db.LogMode(false)
-	db.CreateTable(&Challenge{}, &Submission{}, &Team{})
+	db.CreateTable(&Challenge{}, &Submission{}, &User{})
 
 	for _, chal := range chals {
 		db.Create(chal)

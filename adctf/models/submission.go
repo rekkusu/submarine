@@ -2,6 +2,7 @@ package models
 
 import (
 	"errors"
+	"github.com/activedefense/submarine/adctf/config"
 	"time"
 
 	"github.com/activedefense/submarine/ctf"
@@ -91,46 +92,59 @@ func GetSubmissionCount(db *gorm.DB) (int, error) {
 }
 
 func GetSubmissions(db *gorm.DB, offset, limit int) (submissions []Submission, err error) {
-	teams, err := GetTeams(db)
-	if err != nil {
-		return nil, err
-	}
-
-	challenges, err := GetChallenges(db)
-	if err != nil {
-		return nil, err
-	}
-
 	if err = db.Offset(offset).Limit(limit).Find(&submissions).Error; err != nil {
 		return nil, err
 	}
 
-	for i, _ := range submissions {
-		submissions[i].Team = &teams[submissions[i].TeamID-1]
-		submissions[i].Challenge = &challenges[submissions[i].ChallengeID-1]
+	if err = joinSubmissions(db, submissions); err != nil {
+		return nil, err
 	}
+
 	return
 }
 
 func GetCorrectSubmissions(db *gorm.DB) (submissions []Submission, err error) {
-	teams, err := GetTeams(db)
-	if err != nil {
-		return nil, err
-	}
-
-	challenges, err := GetChallenges(db)
-	if err != nil {
-		return nil, err
-	}
-
 	if err = db.Where("correct == 1").Find(&submissions).Error; err != nil {
 		return nil, err
 	}
 
+	if err = joinSubmissions(db, submissions); err != nil {
+		return nil, err
+	}
+
+	return
+}
+
+func joinSubmissions(db *gorm.DB, submissions []Submission) (err error) {
+	var teams []Team
+	if config.CTF.Team {
+		teams, err = GetTeams(db)
+		if err != nil {
+			return
+		}
+	}
+
+	users, err := GetUsers(db)
+	if err != nil {
+		return
+	}
+
+	challenges, err := GetChallenges(db)
+	if err != nil {
+		return
+	}
+
 	for i, _ := range submissions {
-		submissions[i].Team = &teams[submissions[i].TeamID-1]
+		submissions[i].User = users[submissions[i].UserID-1]
+		if config.CTF.Team {
+			submissions[i].Team = &teams[submissions[i].TeamID-1]
+		} else {
+			// Individual mode
+			submissions[i].Team = users[submissions[i].UserID-1]
+		}
 		submissions[i].Challenge = &challenges[submissions[i].ChallengeID-1]
 	}
+
 	return
 }
 

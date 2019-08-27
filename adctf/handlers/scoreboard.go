@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"github.com/activedefense/submarine/adctf/config"
 	"github.com/activedefense/submarine/adctf/models"
 	"net/http"
 	"sort"
@@ -20,7 +21,21 @@ func (h *Handler) GetScoreboard(c echo.Context) error {
 
 	challenges, _ := models.GetChallengesWithSolves(h.DB)
 	submissions, _ := models.GetCorrectSubmissions(h.DB)
-	teams, _ := models.GetTeams(h.DB)
+
+	var teams []ctf.Team
+	if config.CTF.Team {
+		t, _ := models.GetTeams(h.DB)
+		teams = make([]ctf.Team, len(t))
+		for i, _ := range t {
+			teams[i] = t[i]
+		}
+	} else {
+		u, _ := models.GetUsers(h.DB)
+		teams = make([]ctf.Team, len(u))
+		for i, _ := range u {
+			teams[i] = u[i]
+		}
+	}
 
 	scores := h.Scoring.GetScores(challenges, submissions, teams)
 
