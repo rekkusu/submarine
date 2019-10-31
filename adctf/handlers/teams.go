@@ -34,8 +34,20 @@ func (h *Handler) GetTeamByID(c echo.Context) error {
 		return err
 	}
 
+	members, err := models.GetUsersFromTeamID(h.DB, id)
+	if err != nil {
+		return err
+	}
+
 	solved, err := models.GetSolvedChallenges(h.DB, team.GetID())
+	if err != nil {
+		return err
+	}
+
 	solves, err := models.GetSolves(h.DB)
+	if err != nil {
+		return err
+	}
 
 	for _, chal := range solved {
 		var count int
@@ -51,9 +63,10 @@ func (h *Handler) GetTeamByID(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, struct {
-		ctf.Team
-		Solved []models.Submission `json:"solved"`
-	}{team, solved})
+		ctf.Team `json:"team"`
+		Solved   []models.Submission `json:"solved"`
+		Members  []*models.User      `json:"members"`
+	}{team, solved, members})
 }
 
 func (h *Handler) CreateTeam(c echo.Context) error {

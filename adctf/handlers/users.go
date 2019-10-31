@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"github.com/activedefense/submarine/adctf/config"
 	"net/http"
 
@@ -16,12 +15,13 @@ import (
 func (h *Handler) Signup(c echo.Context) error {
 	var form struct {
 		Username  string `json:"Username" validate:"required,min=4,max=32"`
-		Password  string `json:"Password" validate:"required,eqfield=Password2"`
+		Password  string `json:"Password" validate:"required,min=4,eqfield=Password2"`
 		Password2 string `json:"Password2" validate:"required"`
 		Team      struct {
-			Mode         string `validate:"required"`
-			TeamName     string `json:"name" validate:"required,min=2"`
-			TeamPassword string `json:"Password" validate:"required,min=8"`
+			Mode          string `validate:"required"`
+			TeamName      string `json:"name" validate:"required,min=1"`
+			TeamPassword  string `json:"password" validate:"required,min=8"`
+			TeamPassword2 string `json:"password2" validate:"required,min=8,eqfield=TeamPassword2"`
 		} `json:"Team"`
 	}
 
@@ -29,18 +29,27 @@ func (h *Handler) Signup(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Bad Request")
 	}
 
+	if form.Team.Mode != "create" && form.Team.Mode != "join" {
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid mode")
+	}
+
+	if form.Team.Mode == "join" {
+		form.Team.TeamPassword2 = form.Team.TeamPassword
+	}
+
 	validate := validator.New()
 	if err := validate.Struct(form); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	fmt.Printf("%s\n", form.Team.Mode)
 	passhash, err := bcrypt.GenerateFromPassword([]byte(form.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return err
 	}
 
 	tx := h.DB.Begin()
+	defer tx.RollbackUnlessCommitted()
+
 	if !config.CTF.Team {
 		form.Team.Mode = "create"
 		form.Team.TeamName = form.Username
@@ -74,15 +83,12 @@ func (h *Handler) Signup(c echo.Context) error {
 	}
 
 	if err := user.Create(tx); err != nil {
-		tx.Rollback()
 		return err
 	}
 
 	err = models.JoinTeam(tx, user.ID, form.Team.TeamName, form.Team.TeamPassword)
 	if err != nil {
-		tx.Rollback()
 		return err
-		return echo.NewHTTPError(http.StatusUnauthorized, "Team error")
 	}
 
 	tx.Commit()

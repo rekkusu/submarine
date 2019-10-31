@@ -52,6 +52,16 @@ func GetUsers(db *gorm.DB) (users []*User, err error) {
 	return
 }
 
+func GetUsersFromTeamID(db *gorm.DB, id int) ([]*User, error) {
+	var users []*User
+	err := db.Where("team_id=?", id).Find(&users).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return users, nil
+}
+
 func GetUser(db *gorm.DB, id int) (*User, error) {
 	var u User
 	if err := db.First(&u, id).Error; err != nil {
